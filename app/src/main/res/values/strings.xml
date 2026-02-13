@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MultiTest</string>
+    <string name="jump_to_tex_image_2d">jump to tex image 2d</string>
+    <string name="button_test_tex_image2d">glTextImage2D</string>
+    <string name="button_test_tex_image2d_on_screen">teximage2d onscreen</string>
+    <string name="activity_tex_image_2d">activity tex image 2d, click to show action bar</string>
+</resources>

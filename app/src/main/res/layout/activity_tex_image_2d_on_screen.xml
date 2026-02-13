@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".teximage2d.ActivityTexImage2DOnScreen">
+
+    <LinearLayout
+        android:id="@+id/teximage2donscreen_linearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:background="@color/cardview_light_background">
+        <Button
+            android:id="@+id/teximage2d_onscreen_control"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="resumed"/>
+        <TextView
+            android:id="@+id/textview_teximage2d_onscreen_width"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="width"
+            android:text="-1"/>
+        <TextView
+            android:id="@+id/textview_teximage2d_onscreen_height"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="height"
+            android:text="-1"/>
+        <TextView
+            android:id="@+id/textview_teximage2d_onscreen_glsfv_cnt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="glsfv_cnt"
+            android:text="-1"/>
+        <TextView
+            android:id="@+id/textview_teximage2d_onscreen_glsfv_column"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="glsfv_cnt"
+            android:text="-1"/>
+    </LinearLayout>
+    <ScrollView
+        app:layout_constraintTop_toBottomOf="@+id/teximage2donscreen_linearlayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <GridLayout
+            android:id="@+id/glsfv_container"
+            android:columnCount="8"
+            android:foregroundGravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        </GridLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
