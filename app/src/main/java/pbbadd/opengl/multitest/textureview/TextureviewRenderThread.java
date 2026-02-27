@@ -94,18 +94,19 @@ public class TextureviewRenderThread extends Thread {
                         if (EGL14.eglMakeCurrent(egl_display, info.eglSurface, info.eglSurface, egl_context)) {
                             render_ing(info.w, info.h);
                             EGL14.eglSwapBuffers(egl_display, info.eglSurface);
+//                            fencesynctest();
+                            fencesyncduptest();
                         }
                     }
                 }
                 pres_size=surface_info_list.size();
-
-                fencesynctest();
+//                fencesynctest();
             }
 
             if(pres_size!=last_size) {
                 sleep_interval=sleep_interval+100;
             } else {
-                sleep_interval=0;
+                sleep_interval=1;
             }
             last_size=pres_size;
             // speed control
@@ -131,6 +132,7 @@ public class TextureviewRenderThread extends Thread {
     }
 
     private native void fencesynctest();
+    private native void fencesyncduptest();
 
     private EGLDisplay egl_display;
     private EGLContext egl_context;
@@ -199,8 +201,9 @@ public class TextureviewRenderThread extends Thread {
     }
 
     private void render_ing(int w,int h) {
-        int[] data=get_data_with_random_color();
-        int texId = createTexture30(data, w, h);
+//        int[] data=get_data_with_random_color();
+        int[] data_order=get_data_with_order_color();
+        int texId = createTexture30(data_order, w, h);
         if (texId == 0) {
             Log.e(tag,"create texture id failed");
             return;
@@ -237,8 +240,15 @@ public class TextureviewRenderThread extends Thread {
 
     private int[] get_data_with_random_color() {
         int index=random.nextInt(data_map.size());
-        int[] data=data_map.get(index);
         return data_map.get(index);
+    }
+
+    private int next_color_index=0;
+    private int[] get_data_with_order_color() {
+        int[] res= data_map.get(next_color_index);
+        ++next_color_index;
+        next_color_index=(next_color_index)%data_map.size();
+        return res;
     }
 
     private Random random=new Random();
