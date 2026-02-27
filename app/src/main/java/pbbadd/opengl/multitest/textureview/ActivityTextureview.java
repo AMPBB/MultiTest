@@ -2,6 +2,8 @@ package pbbadd.opengl.multitest.textureview;
 
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.TextureView;
@@ -61,6 +63,9 @@ public class ActivityTextureview extends AppCompatActivity {
         init_component();
         control_setting();
         Log.d(log_tag,"activity onCreate()");
+
+        control_setting_handler=new Handler(Looper.getMainLooper());
+        control_setting_auto_thread_create();
     }
 
     private void init_component() {
@@ -83,27 +88,93 @@ public class ActivityTextureview extends AppCompatActivity {
         par_threads_cnt =Integer.parseInt(Objects.requireNonNull(tthreads_cnt.getText()).toString());
         Log.d(log_tag,String.format(Locale.US,"w=%d,h=%d,cnt=%d,col=%d,thread cnt=%d", par_w, par_h, par_cnt, par_col,par_threads_cnt));
     }
-    private void control_setting() {
+
+    private void control_setting_start() {
         String s="■";
+        control.setClickable(false);
+        set_params();
+        create_list();
+        is_started=true;
+        control.setText(s);
+        control.setClickable(true);
+    }
+
+    private void control_setting_stop() {
+        String d="▶";
+        control.setClickable(false);
+        destroy_list();
+        is_started=false;
+        control.setText(d);
+        control.setClickable(true);
+    }
+    private void control_setting() {
         String d="▶";
         control.setText(d);
         is_started=false;
         control.setOnClickListener(v->{
             if(!is_started) { //false
-                control.setClickable(false);
-                set_params();
-                create_list();
-                is_started=true;
-                control.setText(s);
-                control.setClickable(true);
+                control_setting_start();
+//                control_setting_auto_thread_create();
             } else {
-                control.setClickable(false);
-                destroy_list();
-                is_started=false;
-                control.setText(d);
-                control.setClickable(true);
+//                control_setting_auto_thread_destroy();
+                control_setting_stop();
             }
         });
+    }
+
+    private Thread control_setting_auto_thread=null;
+    private boolean control_setting_auto_thread_is_running;
+    private Handler control_setting_handler=null;
+    private void control_setting_auto() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+//        control_setting_stop();
+//        try {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+//        control_setting_start();
+
+        control_setting_handler.post(new Runnable() {
+            @Override
+            public void run() {
+                control.performClick();
+            }
+        });
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private void control_setting_auto_thread_create() {
+        control_setting_auto_thread=new Thread(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            while(control_setting_auto_thread_is_running) {
+                control_setting_auto();
+            }
+        });
+        control_setting_auto_thread_is_running=true;
+        control_setting_auto_thread.start();
+    }
+    private void control_setting_auto_thread_destroy() {
+        control_setting_auto_thread_is_running=false;
+        control_setting_auto_thread.interrupt();
+        try {
+            control_setting_auto_thread.join(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        control_setting_auto_thread=null;
     }
 
     private void create_render_thread_list() {

@@ -19,8 +19,11 @@ find_library(
 
 target_link_libraries(
         gles30testdemo
+        ${android}
+        ${EGL}
         ${EGL-lib}
         ${GLES3-lib}
+        ${GLESv3}
         ${log-lib})
 
 if(${ANDROID_ABI} STREQUAL "arm64-v8a")

@@ -47,15 +47,23 @@ Java_pbbadd_opengl_multitest_textureview_TextureviewRenderThread_fencesynctest(J
     fence_sync_test();
 }
 
+
 void fence_sync_dup_test() {
     EGLDisplay eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     EGLint major, minor;
-    eglInitialize(eglDisplay, &major, &minor);
+    if(!eglInitialize(eglDisplay, &major, &minor)) {
+        LOGE("egl function load failed,return!");
+        return;
+    }
+
+    PFNEGLDUPNATIVEFENCEFDANDROIDPROC my_eglDupNativeFenceFDANDROID = nullptr;
+    my_eglDupNativeFenceFDANDROID = (PFNEGLDUPNATIVEFENCEFDANDROIDPROC)eglGetProcAddress("eglDupNativeFenceFDANDROID");
+
     EGLSyncKHR sync_fence;
     EGLBoolean wait_result;
     sync_fence = eglCreateSyncKHR(eglDisplay, EGL_SYNC_NATIVE_FENCE_ANDROID, nullptr);
 
-    EGLint fd= eglDupNativeFenceFDANDROID(eglDisplay, sync_fence);
+    EGLint fd= my_eglDupNativeFenceFDANDROID(eglDisplay, sync_fence);
     if(fd<0) {
         LOGW("dup failed");
         return;

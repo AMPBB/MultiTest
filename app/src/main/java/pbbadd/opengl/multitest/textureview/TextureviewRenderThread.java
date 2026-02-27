@@ -94,8 +94,8 @@ public class TextureviewRenderThread extends Thread {
                         if (EGL14.eglMakeCurrent(egl_display, info.eglSurface, info.eglSurface, egl_context)) {
                             render_ing(info.w, info.h);
                             EGL14.eglSwapBuffers(egl_display, info.eglSurface);
-//                            fencesynctest();
-                            fencesyncduptest();
+                            fencesynctest();
+//                            fencesyncduptest();
                         }
                     }
                 }
