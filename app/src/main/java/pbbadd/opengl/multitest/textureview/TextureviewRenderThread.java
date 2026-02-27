@@ -39,10 +39,12 @@ public class TextureviewRenderThread extends Thread {
 
     // GL 3.0程序ID
     private int programId;
+    private int index;
 
-    public TextureviewRenderThread(int w, int h) {
+    public TextureviewRenderThread(int w, int h,int i) {
         tv_w = w;
         tv_h = h;
+        index=i;
     }
 
     public TextureviewRenderThread() {
@@ -120,7 +122,7 @@ public class TextureviewRenderThread extends Thread {
             }
         }
 
-        releaseAllResources();
+        egl_destroy();
         render_unprepare();
         is_egl_inited = false;
         Log.d(tag, "render thread stopped run()");
@@ -147,6 +149,7 @@ public class TextureviewRenderThread extends Thread {
             Log.e(tag,"EGL_NO_DISPLAY");
             return false;
         }
+        Log.d(tag,"display created,"+index);
         int[] egl_version_major=new int[2];
         int[] elg_version_minor=new int[2];
         if(!EGL14.eglInitialize(egl_display,egl_version_major,0,elg_version_minor,0)) {
@@ -183,7 +186,7 @@ public class TextureviewRenderThread extends Thread {
         if (egl_context == EGL14.EGL_NO_CONTEXT) {
             return false;
         }
-
+        Log.d(tag,"context created,"+index);
         // this is just for test
         if (!EGL14.eglMakeCurrent(egl_display, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, egl_context)) {
             return false;
@@ -191,6 +194,27 @@ public class TextureviewRenderThread extends Thread {
 
         Log.d(tag, "egl init done");
         return true;
+    }
+
+    private void egl_destroy() {
+        // 2. 销毁GLES3.0 Context
+        if (egl_context != null) {
+            EGL14.eglDestroyContext(egl_display, egl_context);
+            Log.d(tag,"context released,"+index);
+        }
+
+        // 3. 终止EGL Display
+        if (egl_display != null) {
+            EGL14.eglTerminate(egl_display);
+            Log.d(tag,"display terminated,"+index);
+        }
+
+        // 4. 删除GLES3.0着色器程序
+        if (programId != 0) {
+            GLES30.glDeleteProgram(programId);
+        }
+
+        released_done = true;
     }
 
 
@@ -251,7 +275,7 @@ public class TextureviewRenderThread extends Thread {
         return res;
     }
 
-    private Random random=new Random();
+    private final Random random=new Random();
     private void fill_data_with_random_color(int[] data) {
         int color_index=random.nextInt()%3;
         int color_red  =0xffff0000; //red
@@ -369,7 +393,7 @@ public class TextureviewRenderThread extends Thread {
 
 //    private final String synchronized_flag="sync";
     private final Object synchronized_flag=new Object();
-    private List<SurfaceInfo> surface_info_list=new ArrayList<>();
+    private final List<SurfaceInfo> surface_info_list=new ArrayList<>();
     public void add_surface_info(SurfaceInfo sfi) {
         int[] windows_surface_attribute = {EGL14.EGL_NONE};
         sfi.eglSurface=EGL14.eglCreateWindowSurface(egl_display,egl_config,sfi.surfaceTexture,windows_surface_attribute,0);
@@ -394,25 +418,6 @@ public class TextureviewRenderThread extends Thread {
         } catch (InterruptedException e) {
             Log.e(tag, "stopRender() error" + e.getMessage());
         }
-    }
-
-    private void releaseAllResources() {
-        // 2. 销毁GLES3.0 Context
-        if (egl_context != null) {
-            EGL14.eglDestroyContext(egl_display, egl_context);
-        }
-
-        // 3. 终止EGL Display
-        if (egl_display != null) {
-            EGL14.eglTerminate(egl_display);
-        }
-
-        // 4. 删除GLES3.0着色器程序
-        if (programId != 0) {
-            GLES30.glDeleteProgram(programId);
-        }
-
-        released_done = true;
     }
 
     /**

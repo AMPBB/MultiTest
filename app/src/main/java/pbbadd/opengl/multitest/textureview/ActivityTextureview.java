@@ -181,7 +181,7 @@ public class ActivityTextureview extends AppCompatActivity {
         render_thread_list = new ArrayList<>();
         int i;
         for(i=0;i<par_threads_cnt;++i) {
-            TextureviewRenderThread tv_rt = new TextureviewRenderThread(par_w,par_h);
+            TextureviewRenderThread tv_rt = new TextureviewRenderThread(par_w,par_h,i);
             render_thread_list.add(tv_rt);
             tv_rt.start();
         }
@@ -237,6 +237,11 @@ public class ActivityTextureview extends AppCompatActivity {
 
     private void destroy_texture_view_list() {
         for(TextureView tv:texture_view_list) {
+            tv.setSurfaceTextureListener(null);
+            SurfaceTexture st=tv.getSurfaceTexture();
+            if(st!=null) {
+                st.release();
+            }
             textureview_container.removeView(tv);
         }
     }
