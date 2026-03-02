@@ -65,7 +65,7 @@ public class ActivityTextureview extends AppCompatActivity {
         Log.d(log_tag,"activity onCreate()");
 
         control_setting_handler=new Handler(Looper.getMainLooper());
-        control_setting_auto_thread_create();
+//        control_setting_auto_thread_create();
     }
 
     private void init_component() {
