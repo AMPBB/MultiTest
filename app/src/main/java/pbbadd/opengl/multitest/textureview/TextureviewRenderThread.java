@@ -8,8 +8,10 @@ import android.opengl.GLES30;
 import android.opengl.EGL14;
 import android.util.Log;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,14 +43,13 @@ public class TextureviewRenderThread extends Thread {
     private int programId;
     private int index;
 
+    private ControlEGL control_egl;
+
     public TextureviewRenderThread(int w, int h,int i) {
         tv_w = w;
         tv_h = h;
         index=i;
-    }
-
-    public TextureviewRenderThread() {
-
+        control_egl=new ControlEGL(i);
     }
 
     private void frame_print_debug(int frame_cnt) {
@@ -72,7 +73,6 @@ public class TextureviewRenderThread extends Thread {
             is_egl_inited =true;
         }
 
-        initGL30Resources();
         render_prepare(tv_w,tv_h);
 
         int last_size=-1;
@@ -102,7 +102,6 @@ public class TextureviewRenderThread extends Thread {
                     }
                 }
                 pres_size=surface_info_list.size();
-//                fencesynctest();
             }
 
             if(pres_size!=last_size) {
@@ -219,24 +218,35 @@ public class TextureviewRenderThread extends Thread {
 
 
     private void render_prepare(int w,int h) {
-        GLES30.glViewport(0, 0, w, h);
-        GLES30.glUseProgram(programId);
-        create_data(w,h);
+        if(control_egl.egl_init()) {
+            if(control_egl.create_program_30()) {
+                GLES30.glViewport(0, 0, w, h);
+                GLES30.glUseProgram(programId);
+                create_data(w,h);
+                Log.d(tag,"render_prepare done,index="+index);
+                return;
+            }
+        }
+        Log.e(tag,"render_prepare failed,index="+index);
     }
 
     private void render_ing(int w,int h) {
-//        int[] data=get_data_with_random_color();
         int[] data_order=get_data_with_order_color();
-        int texId = createTexture30(data_order, w, h);
-        if (texId == 0) {
+        int texture_id = create_texture(data_order, w, h);
+        if (texture_id == 0) {
             Log.e(tag,"create texture id failed");
             return;
         }
-        drawFullScreenQuad30(texId);
-        GLES30.glDeleteTextures(1, new int[]{texId}, 0);
+        Log.d(tag,"draw...,index="+index);
+        control_egl.draw_texture_on_screen(texture_id);
+        Log.d(tag,"draw done,index="+index);
+        GLES30.glDeleteTextures(1, new int[]{texture_id}, 0);
     }
 
     private void render_unprepare() {
+        is_running=false;
+        control_egl.destroy_program_30();
+        control_egl.egl_destroy();
         destroy_data();
     }
 
@@ -254,17 +264,12 @@ public class TextureviewRenderThread extends Thread {
             Arrays.fill(data,color);
             data_map.put(i,data);
         }
-        Log.d(tag,"create_data done,"+data_map.size());
+        Log.d(tag,"create_data done,index="+index);
     }
 
     private void destroy_data() {
         data_map.clear();
-        Log.d(tag,"destroy_data done");
-    }
-
-    private int[] get_data_with_random_color() {
-        int index=random.nextInt(data_map.size());
-        return data_map.get(index);
+        Log.d(tag,"destroy_data done,index="+index);
     }
 
     private int next_color_index=0;
@@ -275,32 +280,21 @@ public class TextureviewRenderThread extends Thread {
         return res;
     }
 
-    private final Random random=new Random();
-    private void fill_data_with_random_color(int[] data) {
-        int color_index=random.nextInt()%3;
-        int color_red  =0xffff0000; //red
-        int color_blue =0xff0000ff; //bb
-        int color_green=0xff00ff00; //gg
-        int color=0xff000000;
-        color=color|(0xff<<(color_index*8));
-        Arrays.fill(data,color);
-    }
-
     /**
      * 创建GLES3.0 2D纹理（纯3.0调用）
      */
-    private int createTexture30(int[] data, int w, int h) {
+    private int create_texture(int[] data, int w, int h) {
         // 生成GLES3.0纹理ID
         int[] textures = new int[1];
         GLES30.glGenTextures(1, textures, 0);
-        int texId = textures[0];
-        if (texId == 0) {
+        int texture_id = textures[0];
+        if (texture_id == 0) {
             Log.e(tag, "GLES3.0生成纹理ID失败");
             return 0;
         }
 
         // 绑定GLES3.0纹理
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, texId);
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, texture_id);
 
         // 设置GLES3.0纹理参数（优化采样效率）
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST);
@@ -323,6 +317,7 @@ public class TextureviewRenderThread extends Thread {
             byteBuffer.put(a);
         }
         byteBuffer.position(0);
+//        Buffer data2buffer = IntBuffer.wrap(data);
 
         // 上传纹理数据到GLES3.0
         GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA,
@@ -336,59 +331,7 @@ public class TextureviewRenderThread extends Thread {
             return 0;
         }
 
-        return texId;
-    }
-
-    /**
-     * 绘制GLES3.0全屏矩形（复用你提供的顶点数据+location布局）
-     */
-    private void drawFullScreenQuad30(int texId) {
-        // GLES3.0全屏顶点数据（位置+纹理坐标，复用你的代码）
-        float[] fullScreenVertices = {
-                // 位置坐标（NDC）  // 纹理坐标
-                -1.0f,  1.0f, 0.0f,  0.0f, 1.0f, // 左上
-                -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, // 左下
-                1.0f,  1.0f, 0.0f,  1.0f, 1.0f, // 右上
-                1.0f, -1.0f, 0.0f,  1.0f, 0.0f  // 右下
-        };
-
-        // 创建GLES3.0 VBO（顶点缓冲对象）
-        int[] vbo = new int[1];
-        GLES30.glGenBuffers(1, vbo, 0);
-        GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, vbo[0]);
-        GLES30.glBufferData(GLES30.GL_ARRAY_BUFFER, fullScreenVertices.length * 4,
-                ByteBuffer.allocateDirect(fullScreenVertices.length * 4)
-                        .order(ByteOrder.nativeOrder())
-                        .asFloatBuffer()
-                        .put(fullScreenVertices)
-                        .position(0),
-                GLES30.GL_STATIC_DRAW);
-
-        // GLES3.0 location布局绑定（无需glGetAttribLocation）
-        // location=0：顶点位置
-        GLES30.glEnableVertexAttribArray(0);
-        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 20, 0);
-
-        // location=1：纹理坐标
-        GLES30.glEnableVertexAttribArray(1);
-        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 20, 12);
-
-        // 绑定GLES3.0纹理到采样器
-        int uTexture = GLES30.glGetUniformLocation(programId, "ourTexture");
-        GLES30.glUniform1i(uTexture, 0);
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, texId);
-
-        // GLES3.0绘制（三角带）
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4);
-
-        // 释放GLES3.0 VBO
-        GLES30.glDeleteBuffers(1, vbo, 0);
-
-        int glErr = GLES30.glGetError();
-        if (glErr != GLES30.GL_NO_ERROR) {
-            Log.e(tag, "绘制全屏矩形后GL错误：0x" + Integer.toHexString(glErr));
-        }
+        return texture_id;
     }
 
 //    private final String synchronized_flag="sync";
@@ -418,95 +361,6 @@ public class TextureviewRenderThread extends Thread {
         } catch (InterruptedException e) {
             Log.e(tag, "stopRender() error" + e.getMessage());
         }
-    }
-
-    /**
-     * 初始化GLES3.0资源（仅创建3.0着色器程序）
-     */
-    private void initGL30Resources() {
-        // 创建GLES3.0着色器程序
-        programId = createProgram30();
-        if (programId == 0) {
-            Log.e(tag, "创建GLES3.0着色器程序失败");
-            is_running = false;
-            return;
-        }
-        Log.d(tag, "GLES3.0着色器程序初始化成功，程序ID：" + programId);
-    }
-
-    /**
-     * 创建GLES3.0着色器程序（纯3.0语法，无2.0分支）
-     */
-    private int createProgram30() {
-        // 1. GLES3.0顶点着色器（复用你提供的代码）
-        String vertexShader30 = "#version 300 es\n" +
-                "layout (location = 0) in vec3 aPos;\n" +
-                "layout (location = 1) in vec2 aTexCoord;\n" +
-                "out vec2 TexCoord;\n" +
-                "void main() {\n" +
-                "    gl_Position = vec4(aPos, 1.0);\n" +
-                "    TexCoord = aTexCoord;\n" +
-                "}\n";
-
-        // 2. GLES3.0片段着色器（复用你提供的代码）
-        String fragShader30 = "#version 300 es\n" +
-                "precision mediump float;\n" +
-                "in vec2 TexCoord;\n" +
-                "out vec4 FragColor;\n" +
-                "uniform sampler2D ourTexture;\n" +
-                "void main() {\n" +
-                "    FragColor = texture(ourTexture, TexCoord);\n" +
-                "}\n";
-
-        // 编译顶点着色器
-        int vertexShader = loadShader30(GLES30.GL_VERTEX_SHADER, vertexShader30);
-        if (vertexShader == 0) return 0;
-
-        // 编译片段着色器
-        int fragShader = loadShader30(GLES30.GL_FRAGMENT_SHADER, fragShader30);
-        if (fragShader == 0) return 0;
-
-        // 链接程序
-        int program = GLES30.glCreateProgram();
-        GLES30.glAttachShader(program, vertexShader);
-        GLES30.glAttachShader(program, fragShader);
-        GLES30.glLinkProgram(program);
-
-        // 检查链接状态
-        int[] linkStatus = new int[1];
-        GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0);
-        if (linkStatus[0] != GLES30.GL_TRUE) {
-            String linkLog = GLES30.glGetProgramInfoLog(program);
-            Log.e(tag, "GLES3.0着色器程序链接失败：\n" + linkLog);
-            GLES30.glDeleteProgram(program);
-            program = 0;
-        }
-
-        // 删除临时着色器（释放资源）
-        GLES30.glDeleteShader(vertexShader);
-        GLES30.glDeleteShader(fragShader);
-        return program;
-    }
-
-    /**
-     * 加载GLES3.0着色器（带详细错误日志）
-     */
-    private int loadShader30(int type, String source) {
-        int shader = GLES30.glCreateShader(type);
-        GLES30.glShaderSource(shader, source);
-        GLES30.glCompileShader(shader);
-
-        // 检查编译状态
-        int[] compileStatus = new int[1];
-        GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compileStatus, 0);
-        if (compileStatus[0] != GLES30.GL_TRUE) {
-            String compileLog = GLES30.glGetShaderInfoLog(shader);
-            String shaderType = type == GLES30.GL_VERTEX_SHADER ? "顶点" : "片段";
-            Log.e(tag, "GLES3.0" + shaderType + "着色器编译失败：\n日志：" + compileLog + "\n代码：\n" + source);
-            GLES30.glDeleteShader(shader);
-            shader = 0;
-        }
-        return shader;
     }
 
 }

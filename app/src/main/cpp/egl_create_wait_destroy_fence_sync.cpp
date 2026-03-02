@@ -6,28 +6,6 @@ void fence_sync_test() {
     eglInitialize(eglDisplay, &major, &minor);
     EGLSyncKHR syncObj;
     syncObj = eglCreateSyncKHR(eglDisplay,EGL_SYNC_FENCE_KHR,nullptr);
-//    EGLint wait_result = eglClientWaitSyncKHR(eglDisplay, syncObj, EGL_SYNC_FLUSH_COMMANDS_BIT_KHR, EGL_FOREVER_KHR);
-//    EGLBoolean wait_result = eglWaitSyncKHR(eglDisplay,syncObj,EGL_SYNC_FLUSH_COMMANDS_BIT_KHR);
-//    switch (wait_result) {
-//        case EGL_CONDITION_SATISFIED_KHR:
-//            LOGD("EGL_CONDITION_SATISFIED_KHR");
-//            break;
-//        case EGL_TIMEOUT_EXPIRED_KHR:
-//            LOGD("EGL_TIMEOUT_EXPIRED_KHR");
-//            break;
-//        case EGL_ALREADY_SIGNALED_NV: //case EGL_ALREADY_SIGNALED_KHR:
-//            LOGD("EGL_ALREADY_SIGNALED_NV");
-//            break;
-//        case EGL_FALSE:
-//            LOGD("EGL_FALSE");
-//            break;
-//        case EGL_TRUE:
-//            LOGD("EGL_TRUE");
-//            break;
-//        default:
-//            LOGE("what wait result? 0x%x", wait_result);
-//            break;
-//    }
     EGLBoolean wait_result = eglWaitSyncKHR(eglDisplay,syncObj,0);
     switch (wait_result) {
         case EGL_FALSE:
@@ -39,7 +17,7 @@ void fence_sync_test() {
     }
     eglDestroySyncKHR(eglDisplay, syncObj);
     LOGD("done");
-//    eglTerminate(eglDisplay);
+    eglTerminate(eglDisplay);
 }
 
 extern "C" JNIEXPORT void JNICALL
