@@ -16,9 +16,9 @@ public class ControlEGL {
 
     private final String tag="ControlEGL";
 
-    private EGLDisplay egl_display;
-    private EGLContext egl_context;
-    private EGLConfig egl_config;
+    public EGLDisplay egl_display;
+    public EGLContext egl_context;
+    public EGLConfig egl_config;
     private boolean is_egl_inited=false;
     private int index;
     private boolean released_done=false;
@@ -135,11 +135,17 @@ public class ControlEGL {
 
         // 编译顶点着色器
         int vertexShader = loadShader30(GLES30.GL_VERTEX_SHADER, vertexShader30);
-        if (vertexShader == 0) return false;
+        if (vertexShader == 0) {
+            Log.e(tag,"vertex shader error");
+            return false;
+        }
 
         // 编译片段着色器
         int fragShader = loadShader30(GLES30.GL_FRAGMENT_SHADER, fragShader30);
-        if (fragShader == 0) return false;
+        if (fragShader == 0) {
+            Log.e(tag,"frag shader error");
+            return false;
+        }
 
         // 链接程序
         program_id = GLES30.glCreateProgram();
@@ -155,6 +161,7 @@ public class ControlEGL {
             Log.e(tag, "shader compile failed,index="+index+",log:" + linkLog);
             GLES30.glDeleteProgram(program_id);
             program_id = 0;
+            return false;
         }
 
         // 删除临时着色器（释放资源）

@@ -64,16 +64,13 @@ public class TextureviewRenderThread extends Thread {
         int frame_cnt=1;
         is_running = false;
 
-        if (!egl_init()) {
-            Log.e(tag, "egl init failed, stop render run");
+        if(!render_prepare(tv_w,tv_h)) {
             is_running = false;
             return;
         } else {
             is_running =true;
             is_egl_inited =true;
         }
-
-        render_prepare(tv_w,tv_h);
 
         int last_size=-1;
         int pres_size=-1;
@@ -93,9 +90,9 @@ public class TextureviewRenderThread extends Thread {
             synchronized (synchronized_flag) {
                 for (SurfaceInfo info : surface_info_list) {
                     if (info.eglSurface != null && info.eglSurface != EGL14.EGL_NO_SURFACE) {
-                        if (EGL14.eglMakeCurrent(egl_display, info.eglSurface, info.eglSurface, egl_context)) {
+                        if (EGL14.eglMakeCurrent(control_egl.egl_display, info.eglSurface, info.eglSurface, control_egl.egl_context)) {
                             render_ing(info.w, info.h);
-                            EGL14.eglSwapBuffers(egl_display, info.eglSurface);
+                            EGL14.eglSwapBuffers(control_egl.egl_display, info.eglSurface);
                             fencesynctest();
 //                            fencesyncduptest();
                         }
@@ -121,7 +118,7 @@ public class TextureviewRenderThread extends Thread {
             }
         }
 
-        egl_destroy();
+        control_egl.egl_destroy();
         render_unprepare();
         is_egl_inited = false;
         Log.d(tag, "render thread stopped run()");
@@ -135,99 +132,18 @@ public class TextureviewRenderThread extends Thread {
     private native void fencesynctest();
     private native void fencesyncduptest();
 
-    private EGLDisplay egl_display;
-    private EGLContext egl_context;
-    private EGLConfig egl_config;
-    private boolean egl_init() {
-        if(is_egl_inited) {
-            Log.e(tag,"egl_init has been called, check code!");
-            return false;
-        }
-        egl_display=EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
-        if(egl_display==EGL14.EGL_NO_DISPLAY) {
-            Log.e(tag,"EGL_NO_DISPLAY");
-            return false;
-        }
-        Log.d(tag,"display created,"+index);
-        int[] egl_version_major=new int[2];
-        int[] elg_version_minor=new int[2];
-        if(!EGL14.eglInitialize(egl_display,egl_version_major,0,elg_version_minor,0)) {
-            Log.e(tag,"version error");
-            return false;
-        }
-        String s_egl_version = String.format(Locale.US,"%d.%d",egl_version_major[0], elg_version_minor[0]);
-        Log.d(tag,"egl version,"+s_egl_version);
-        int[] egl_config_attribute = {
-                EGL14.EGL_ALPHA_SIZE, 8,
-                EGL14.EGL_BLUE_SIZE, 8,
-                EGL14.EGL_GREEN_SIZE, 8,
-                EGL14.EGL_RED_SIZE, 8,
-                EGL14.EGL_DEPTH_SIZE, 0,
-                EGL14.EGL_STENCIL_SIZE, 0,
-                EGL14.EGL_RENDERABLE_TYPE,EGL15.EGL_OPENGL_ES3_BIT,
-                EGL14.EGL_NONE
-        };
-
-        android.opengl.EGLConfig[] egl_configs = new android.opengl.EGLConfig[1];
-        int[] egl_config_cnt = new int[1];
-        if(!EGL14.eglChooseConfig(egl_display, egl_config_attribute,0, egl_configs, 0,1,egl_config_cnt,0)) {
-            return false;
-        } else {
-            Log.d(tag,"config cnt="+egl_config_cnt[0]);
-            egl_config = egl_configs[0];
-        }
-
-        int[] egl_context_attribute = {
-                EGL14.EGL_CONTEXT_CLIENT_VERSION, 3,
-                EGL14.EGL_NONE
-        };
-        egl_context = EGL14.eglCreateContext(egl_display, egl_configs[0], EGL14.EGL_NO_CONTEXT, egl_context_attribute,0);
-        if (egl_context == EGL14.EGL_NO_CONTEXT) {
-            return false;
-        }
-        Log.d(tag,"context created,"+index);
-        // this is just for test
-        if (!EGL14.eglMakeCurrent(egl_display, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, egl_context)) {
-            return false;
-        }
-
-        Log.d(tag, "egl init done");
-        return true;
-    }
-
-    private void egl_destroy() {
-        // 2. 销毁GLES3.0 Context
-        if (egl_context != null) {
-            EGL14.eglDestroyContext(egl_display, egl_context);
-            Log.d(tag,"context released,"+index);
-        }
-
-        // 3. 终止EGL Display
-        if (egl_display != null) {
-            EGL14.eglTerminate(egl_display);
-            Log.d(tag,"display terminated,"+index);
-        }
-
-        // 4. 删除GLES3.0着色器程序
-        if (programId != 0) {
-            GLES30.glDeleteProgram(programId);
-        }
-
-        released_done = true;
-    }
-
-
-    private void render_prepare(int w,int h) {
+    private boolean render_prepare(int w,int h) {
         if(control_egl.egl_init()) {
             if(control_egl.create_program_30()) {
                 GLES30.glViewport(0, 0, w, h);
                 GLES30.glUseProgram(programId);
                 create_data(w,h);
                 Log.d(tag,"render_prepare done,index="+index);
-                return;
+                return true;
             }
         }
         Log.e(tag,"render_prepare failed,index="+index);
+        return false;
     }
 
     private void render_ing(int w,int h) {
@@ -339,7 +255,7 @@ public class TextureviewRenderThread extends Thread {
     private final List<SurfaceInfo> surface_info_list=new ArrayList<>();
     public void add_surface_info(SurfaceInfo sfi) {
         int[] windows_surface_attribute = {EGL14.EGL_NONE};
-        sfi.eglSurface=EGL14.eglCreateWindowSurface(egl_display,egl_config,sfi.surfaceTexture,windows_surface_attribute,0);
+        sfi.eglSurface=EGL14.eglCreateWindowSurface(control_egl.egl_display,control_egl.egl_config,sfi.surfaceTexture,windows_surface_attribute,0);
         synchronized (synchronized_flag) {
             surface_info_list.add(sfi);
             synchronized_flag.notify();
@@ -350,7 +266,7 @@ public class TextureviewRenderThread extends Thread {
         synchronized (synchronized_flag) {
             surface_info_list.remove(sfi);
         }
-        EGL14.eglDestroySurface(egl_display,sfi.eglSurface);
+        EGL14.eglDestroySurface(control_egl.egl_display,sfi.eglSurface);
     }
 
     public void stopRender() {
