@@ -1,5 +1,6 @@
 package pbbadd.opengl.multitest.textureview;
 
+import android.content.Context;
 import android.opengl.EGL15;
 import android.opengl.EGLConfig;
 import android.opengl.EGLContext;
@@ -7,6 +8,8 @@ import android.opengl.EGLDisplay;
 import android.opengl.GLES30;
 import android.opengl.EGL14;
 import android.util.Log;
+import android.view.TextureView;
+import android.widget.GridLayout;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -41,11 +44,49 @@ public class TextureviewRenderThread extends Thread {
     // GL 3.0程序ID
     private int program_id;
     private int index;
+    private boolean should_swap_buffer=false;
+    private boolean should_sync=false;
+    private boolean should_sync_dup=false;
+    private boolean should_sync_every_rending=false;
+    private boolean should_sync_dup_every_rending=false;
+    private int sync_interval_millis=0;
+
+    private Context context=null;
+    private AssetReader asset_reader=null;
 
     public TextureviewRenderThread(int w, int h,int i) {
         tv_w = w;
         tv_h = h;
         index=i;
+    }
+
+    public void set_sync_interval_millis(int i) {
+        sync_interval_millis=i;
+    }
+
+    public void set_context(Context c) {
+        context=c;
+        asset_reader=new AssetReader(context);
+    }
+
+    public void set_should_swap_buffer(boolean value) {
+        should_swap_buffer=value;
+    }
+
+    public void set_should_sync(boolean value) {
+        should_sync=value;
+    }
+
+    public void set_should_sync_dup(boolean value) {
+        should_sync_dup=value;
+    }
+
+    public void set_should_sync_every_rending(boolean value) {
+        should_sync_every_rending=value;
+    }
+
+    public void set_should_sync_dup_every_rending(boolean value) {
+        should_sync_dup_every_rending=value;
     }
 
     @Override
@@ -74,13 +115,28 @@ public class TextureviewRenderThread extends Thread {
                     if (info.eglSurface != null && info.eglSurface != EGL14.EGL_NO_SURFACE) {
                         if (EGL14.eglMakeCurrent(egl_display, info.eglSurface, info.eglSurface, egl_context)) {
                             render_ing(info.w, info.h);
-                            EGL14.eglSwapBuffers(egl_display, info.eglSurface);
-//                            fencesynctest();
-//                            fencesyncduptest();
+                            if(should_swap_buffer) EGL14.eglSwapBuffers(egl_display, info.eglSurface);
+                            if(should_sync_every_rending) fence_sync_test();
+                            if(should_sync_dup_every_rending) fence_sync_dup_test();
+                            if((should_sync_every_rending || should_sync_dup_every_rending) && sync_interval_millis!=0) {
+                                try {
+                                    Thread.sleep(sync_interval_millis);
+                                } catch (InterruptedException e) {
+                                    Log.w(tag, "render thread sleep error" + e.getMessage());
+                                }
+                            }
                         }
                     }
                 }
-                fencesyncduptest();
+                if(should_sync) fence_sync_test();
+                if(should_sync_dup) fence_sync_dup_test();
+                if((should_sync || should_sync_dup) && sync_interval_millis!=0) {
+                    try {
+                        Thread.sleep(sync_interval_millis);
+                    } catch (InterruptedException e) {
+                        Log.w(tag, "render thread sleep error" + e.getMessage());
+                    }
+                }
                 pres_size=surface_info_list.size();
             }
 
@@ -93,7 +149,7 @@ public class TextureviewRenderThread extends Thread {
             // speed control
             try {
                 Thread.sleep(sleep_interval,10);
-                Thread.sleep(32,10);
+//                Thread.sleep(32,10);
             } catch (InterruptedException e) {
                 Log.w(tag, "render thread sleep error" + e.getMessage());
                 break;
@@ -108,8 +164,8 @@ public class TextureviewRenderThread extends Thread {
         System.loadLibrary("gles30testdemo");
     }
 
-    private native void fencesynctest();
-    private native void fencesyncduptest();
+    private native void fence_sync_test();
+    private native void fence_sync_dup_test();
 
     private EGLDisplay egl_display;
     private EGLContext egl_context;
@@ -361,9 +417,11 @@ public class TextureviewRenderThread extends Thread {
             surface_info_list.remove(sfi);
         }
         EGL14.eglDestroySurface(egl_display,sfi.eglSurface);
+        Log.d(tag,"delete surface");
     }
 
     public void stopRender() {
+        Log.d(tag,"stop render");
         synchronized (synchronized_flag) {
             is_running = false;
             is_egl_initialized = false;
@@ -376,38 +434,20 @@ public class TextureviewRenderThread extends Thread {
         }
     }
 
-    /**
-     * 创建GLES3.0着色器程序（纯3.0语法，无2.0分支）
-     */
     private boolean create_shader_program() {
-        // 1. GLES3.0顶点着色器（复用你提供的代码）
-        String vertexShader30 = "#version 300 es\n" +
-                "layout (location = 0) in vec3 aPos;\n" +
-                "layout (location = 1) in vec2 aTexCoord;\n" +
-                "out vec2 TexCoord;\n" +
-                "void main() {\n" +
-                "    gl_Position = vec4(aPos, 1.0);\n" +
-                "    TexCoord = aTexCoord;\n" +
-                "}\n";
+        if(null==asset_reader) {
+            Log.e(tag,"asset reader error");
+            return false;
+        }
+        String vertexShader30 = asset_reader.readTextFromAssets("vertex_shader.txt");
+        String fragShader30 = asset_reader.readTextFromAssets("fragment_shader.txt");
 
-        // 2. GLES3.0片段着色器（复用你提供的代码）
-        String fragShader30 = "#version 300 es\n" +
-                "precision mediump float;\n" +
-                "in vec2 TexCoord;\n" +
-                "out vec4 FragColor;\n" +
-                "uniform sampler2D ourTexture;\n" +
-                "void main() {\n" +
-                "    FragColor = texture(ourTexture, TexCoord);\n" +
-                "}\n";
-
-        // 编译顶点着色器
         int vertexShader = loadShader30(GLES30.GL_VERTEX_SHADER, vertexShader30);
         if (vertexShader == 0) {
-            Log.e(tag,"vertex shader error");;
+            Log.e(tag,"vertex shader error");
             return false;
         }
 
-        // 编译片段着色器
         int fragShader = loadShader30(GLES30.GL_FRAGMENT_SHADER, fragShader30);
         if (fragShader == 0) {
             Log.e(tag,"frag shader error");
