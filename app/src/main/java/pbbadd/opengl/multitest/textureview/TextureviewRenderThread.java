@@ -118,7 +118,7 @@ public class TextureviewRenderThread extends Thread {
                             if(should_swap_buffer) EGL14.eglSwapBuffers(egl_display, info.eglSurface);
                             if(should_sync_every_rending) fence_sync_test();
                             if(should_sync_dup_every_rending) fence_sync_dup_test();
-                            if((should_sync_every_rending || should_sync_dup_every_rending) && sync_interval_millis!=0) {
+                            if(sync_interval_millis!=0) {
                                 try {
                                     Thread.sleep(sync_interval_millis);
                                 } catch (InterruptedException e) {
@@ -130,7 +130,7 @@ public class TextureviewRenderThread extends Thread {
                 }
                 if(should_sync) fence_sync_test();
                 if(should_sync_dup) fence_sync_dup_test();
-                if((should_sync || should_sync_dup) && sync_interval_millis!=0) {
+                if(sync_interval_millis!=0) {
                     try {
                         Thread.sleep(sync_interval_millis);
                     } catch (InterruptedException e) {
