@@ -60,7 +60,7 @@
                 android:id="@+id/t_sync_interval_millis"
                 android:inputType="numberDecimal"
                 android:maxLength="6"
-                android:text="16"
+                android:text="0"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:layout_width="wrap_content"
@@ -137,7 +137,6 @@
             <CheckBox
                 android:id="@+id/checkbox_sync"
                 android:text="sync"
-                android:checked="true"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <CheckBox

@@ -304,7 +304,7 @@ public class ActivityTextureview extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        destroy_list();
+//        destroy_list();
         Log.d(log_tag, "activity onPause()");
     }
 

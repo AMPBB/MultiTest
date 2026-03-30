@@ -295,6 +295,15 @@ public class TextureviewRenderThread extends Thread {
         Log.d(tag,"create_data done,"+data_map.size());
     }
 
+//    private void create_data(int w, int h, boolean color_band) {
+//        if(color_band) {
+//            if((w==512) && (h==512)) {
+//                int i,j;
+//                for()
+//            }
+//        }
+//    }
+
     private void destroy_data() {
         data_map.clear();
         Log.d(tag,"destroy_data done");

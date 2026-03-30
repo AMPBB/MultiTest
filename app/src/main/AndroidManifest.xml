@@ -24,6 +24,9 @@
             android:name=".ActivityTexImage2D"
             android:exported="false" />
         <activity
+            android:name=".cube3d.Cube3DActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

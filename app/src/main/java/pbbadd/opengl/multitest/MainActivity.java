@@ -16,6 +16,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Objects;
 
+import pbbadd.opengl.multitest.cube3d.Cube3DActivity;
 import pbbadd.opengl.multitest.egl.ActivityEGL;
 import pbbadd.opengl.multitest.textureview.ActivityTextureview;
 
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button jump_to_textureview=null;
     private Button jump_to_egl=null;
+    private Button jump_to_cube3d=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         init_jump_to_textureview();
         init_jump_to_egl();
+        init_jump_to_cube3d();
     }
 
     private void init_jump_to_textureview() {
@@ -60,6 +63,15 @@ public class MainActivity extends AppCompatActivity {
         jump_to_egl.setOnClickListener(v->{
             Intent intent=new Intent(MainActivity.this, ActivityEGL.class);
             Log.d(log_tag,"jump to activity egl");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_cube3d() {
+        jump_to_cube3d=findViewById(R.id.button_jump_to_cube3d);
+        jump_to_cube3d.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, Cube3DActivity.class);
+            Log.d(log_tag,"jump to activity cube3d");
             startActivity(intent);
         });
     }
