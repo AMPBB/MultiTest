@@ -9,7 +9,9 @@ add_library(
 
 find_library(
         EGL-lib
-        EGL
+        EGL)
+
+find_library(
         GLES3-lib
         GLESv3)
 
