@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MultiTest">
         <activity
+            android:name=".surfaceview.ActivitySurfaceView"
+            android:exported="false" />
+        <activity
             android:name=".egl.ActivityEGL"
             android:exported="false" />
         <activity
