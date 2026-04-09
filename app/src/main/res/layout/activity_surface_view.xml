@@ -6,5 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".surfaceview.ActivitySurfaceView">
+    <pbbadd.opengl.multitest.surfaceview.CanvasSurfaceView
+        android:id="@+id/canvas_surface_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
