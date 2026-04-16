@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MultiTest">
         <activity
+            android:name=".wallpaper.ActivityWallpaper"
+            android:exported="false" />
+        <activity
             android:name=".surfaceview.ActivitySurfaceView"
             android:exported="false" />
         <activity
@@ -38,6 +41,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- 动态壁纸服务 -->
+        <service
+            android:name=".wallpaper.WallpaperService"
+            android:exported="true"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/wallpaper_info"/>
+        </service>
     </application>
 
 </manifest>

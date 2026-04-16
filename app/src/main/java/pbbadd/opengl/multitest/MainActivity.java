@@ -20,6 +20,7 @@ import pbbadd.opengl.multitest.cube3d.Cube3DActivity;
 import pbbadd.opengl.multitest.egl.ActivityEGL;
 import pbbadd.opengl.multitest.surfaceview.ActivitySurfaceView;
 import pbbadd.opengl.multitest.textureview.ActivityTextureview;
+import pbbadd.opengl.multitest.wallpaper.ActivityWallpaper;
 
 public class MainActivity extends AppCompatActivity {
     private static final String log_tag = "main";
@@ -30,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private Button jump_to_cube3d=null;
 
     private Button jump_to_surface_view=null;
+
+    private Button jump_to_wallpaper=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_egl();
         init_jump_to_cube3d();
         init_jump_to_surface_view();
+        init_jump_to_wallpaper();
     }
 
     private void init_jump_to_textureview() {
@@ -85,6 +89,15 @@ public class MainActivity extends AppCompatActivity {
         jump_to_surface_view.setOnClickListener(v->{
             Intent intent=new Intent(MainActivity.this, ActivitySurfaceView.class);
             Log.d(log_tag,"jump to activity surface view");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_wallpaper() {
+        jump_to_wallpaper=findViewById(R.id.button_jump_to_wallpaper);
+        jump_to_wallpaper.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivityWallpaper.class);
+            Log.d(log_tag,"jump to activity wallpaper");
             startActivity(intent);
         });
     }
