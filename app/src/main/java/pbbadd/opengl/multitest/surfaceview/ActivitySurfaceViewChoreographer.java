@@ -6,12 +6,10 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -19,18 +17,18 @@ import androidx.core.view.WindowInsetsCompat;
 
 import pbbadd.opengl.multitest.R;
 
-public class ActivitySurfaceView extends Activity {
+public class ActivitySurfaceViewChoreographer extends Activity {
 
     public static Resources resource=null;
 
-    public CanvasSurfaceView canvas_surface_view;
+    public CanvasSurfaceViewChoreographer canvas_surface_view_choreographer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         resource = getResources();
-        setContentView(R.layout.activity_surface_view);
-        canvas_surface_view=findViewById(R.id.canvas_surface_view);
+        setContentView(R.layout.activity_surface_view_choreographer);
+        canvas_surface_view_choreographer=findViewById(R.id.canvas_surface_view_choreographer);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
     }
 

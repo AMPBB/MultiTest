@@ -19,6 +19,7 @@ import java.util.Objects;
 import pbbadd.opengl.multitest.cube3d.Cube3DActivity;
 import pbbadd.opengl.multitest.egl.ActivityEGL;
 import pbbadd.opengl.multitest.surfaceview.ActivitySurfaceView;
+import pbbadd.opengl.multitest.surfaceview.ActivitySurfaceViewChoreographer;
 import pbbadd.opengl.multitest.textureview.ActivityTextureview;
 import pbbadd.opengl.multitest.wallpaper.ActivityWallpaper;
 
@@ -31,8 +32,10 @@ public class MainActivity extends AppCompatActivity {
     private Button jump_to_cube3d=null;
 
     private Button jump_to_surface_view=null;
+    private Button jump_to_surface_view_choreographer=null;
 
     private Button jump_to_wallpaper=null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_egl();
         init_jump_to_cube3d();
         init_jump_to_surface_view();
+        init_jump_to_surface_view_choreographer();
         init_jump_to_wallpaper();
     }
 
@@ -89,6 +93,15 @@ public class MainActivity extends AppCompatActivity {
         jump_to_surface_view.setOnClickListener(v->{
             Intent intent=new Intent(MainActivity.this, ActivitySurfaceView.class);
             Log.d(log_tag,"jump to activity surface view");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_surface_view_choreographer() {
+        jump_to_surface_view_choreographer=findViewById(R.id.button_jump_to_surface_view_choreographer);
+        jump_to_surface_view_choreographer.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivitySurfaceViewChoreographer.class);
+            Log.d(log_tag,"jump to activity surface view choreographer");
             startActivity(intent);
         });
     }
