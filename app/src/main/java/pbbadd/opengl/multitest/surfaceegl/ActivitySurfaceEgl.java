@@ -6,16 +6,8 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import pbbadd.opengl.multitest.R;
 
@@ -23,14 +15,17 @@ public class ActivitySurfaceView extends Activity {
 
     public static Resources resource=null;
 
-    public CanvasSurfaceView canvas_surface_view;
+    public SurfaceUseEgl canvas_surface_view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        game_mode();
         super.onCreate(savedInstanceState);
         resource = getResources();
         setContentView(R.layout.activity_surface_view);
         canvas_surface_view=findViewById(R.id.canvas_surface_view);
+        canvas_surface_view.setZOrderOnTop(true);
+        canvas_surface_view.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
     }
 
@@ -47,6 +42,10 @@ public class ActivitySurfaceView extends Activity {
             getWindow().getAttributes().layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
+        );
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
