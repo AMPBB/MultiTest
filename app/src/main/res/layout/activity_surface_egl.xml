@@ -5,9 +5,9 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".surfaceview.ActivitySurfaceView">
-    <pbbadd.opengl.multitest.surfaceview.SurfaceUseEgl
-        android:id="@+id/canvas_surface_view"
+    tools:context=".surfaceegl.ActivitySurfaceEgl">
+    <pbbadd.opengl.multitest.surfaceegl.SurfaceUseEgl
+        android:id="@+id/surface_egl"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

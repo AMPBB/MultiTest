@@ -1,5 +1,6 @@
 package pbbadd.opengl.multitest.textureview;
 
+import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
@@ -7,7 +8,9 @@ import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.TextureView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridLayout;
@@ -123,8 +126,17 @@ public class ActivityTextureview extends AppCompatActivity {
     }
 
     private void control_setting_start() {
+
         String s="■";
         control.setClickable(false);
+
+        tw.clearFocus();
+        th.clearFocus();
+        tcnt.clearFocus();
+        tcol.clearFocus();
+        tthreads_cnt.clearFocus();
+        t_sync_interval_millis.clearFocus();
+
         set_params();
         create_list();
         is_started=true;
@@ -135,11 +147,27 @@ public class ActivityTextureview extends AppCompatActivity {
     private void control_setting_stop() {
         String d="▶";
         control.setClickable(false);
+
+        tw.clearFocus();
+        th.clearFocus();
+        tcnt.clearFocus();
+        tcol.clearFocus();
+        tthreads_cnt.clearFocus();
+        t_sync_interval_millis.clearFocus();
+
         destroy_list();
         is_started=false;
         control.setText(d);
         control.setClickable(true);
     }
+
+    private void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
     private void control_setting() {
         String d="▶";
         control.setText(d);
@@ -152,6 +180,7 @@ public class ActivityTextureview extends AppCompatActivity {
 //                control_setting_auto_thread_destroy();
                 control_setting_stop();
             }
+            hideKeyboard(v);
         });
     }
 

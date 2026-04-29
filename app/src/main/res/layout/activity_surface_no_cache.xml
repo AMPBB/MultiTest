@@ -5,9 +5,9 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".surfaceviewchoregrapher.ActivitySurfaceViewChoreographer">
-    <pbbadd.opengl.multitest.surfaceviewchoregrapher.CanvasSurfaceViewChoreographer
-        android:id="@+id/canvas_surface_view_choreographer"
+    tools:context=".surfaceegl.ActivitySurfaceEgl">
+    <pbbadd.opengl.multitest.surfacenocache.SurfaceNoCache
+        android:id="@+id/surface_no_cache"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

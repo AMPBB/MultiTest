@@ -1,4 +1,4 @@
-package pbbadd.opengl.multitest.surfaceegl;
+package pbbadd.opengl.multitest.surfaceusecache;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
@@ -10,23 +10,24 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import pbbadd.opengl.multitest.R;
+import pbbadd.opengl.multitest.surfaceegl.SurfaceUseEgl;
 
-public class ActivitySurfaceEgl extends Activity {
+public class ActivitySurfaceUseCache extends Activity {
 
     public static Resources resource=null;
 
-    public SurfaceUseEgl surface_egl;
+    public SurfaceUseCache surface_use_cache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         game_mode();
         super.onCreate(savedInstanceState);
         resource = getResources();
-        setContentView(R.layout.activity_surface_egl);
-        surface_egl =findViewById(R.id.surface_egl);
-        surface_egl.setZOrderOnTop(true);
-        surface_egl.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
+        setContentView(R.layout.activity_surface_use_cache);
+        surface_use_cache =findViewById(R.id.surface_use_cache);
+        surface_use_cache.setZOrderOnTop(true);
+//        surface_use_cache.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
     }
 
     @Override

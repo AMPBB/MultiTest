@@ -13,19 +13,32 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MultiTest">
         <activity
-            android:name=".surfaceview.ActivitySurfaceViewChoreographer"
+            android:name=".resizableview.ActivityResizeableView"
             android:exported="false" />
         <activity
             android:name=".wallpaper.ActivityWallpaper"
             android:exported="false"
             android:hardwareAccelerated="true" />
         <activity
-            android:name=".surfaceview.ActivitySurfaceView"
+            android:name=".egl.ActivityEGL"
+            android:exported="false" />
+        <activity
+            android:name=".surfaceegl.ActivitySurfaceEgl"
             android:exported="false"
             android:hardwareAccelerated="true" />
         <activity
-            android:name=".egl.ActivityEGL"
-            android:exported="false" />
+            android:name=".surfacenocache.ActivitySurfaceNoCache"
+            android:exported="false"
+            android:hardwareAccelerated="true" />
+        <activity
+            android:name=".surfaceusecache.ActivitySurfaceUseCache"
+            android:exported="false"
+            android:hardwareAccelerated="true"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".surfaceviewchoregrapher.ActivitySurfaceViewChoreographer"
+            android:exported="false"
+            android:hardwareAccelerated="true" />
         <activity
             android:name=".textureview.ActivityTextureview"
             android:exported="false" />

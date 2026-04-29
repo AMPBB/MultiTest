@@ -1,37 +1,40 @@
-package pbbadd.opengl.multitest.surfaceegl;
+package pbbadd.opengl.multitest.surfacenocache;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
 import pbbadd.opengl.multitest.R;
+import pbbadd.opengl.multitest.surfaceegl.SurfaceUseEgl;
 
-public class ActivitySurfaceEgl extends Activity {
+public class ActivitySurfaceNoCache extends Activity {
 
     public static Resources resource=null;
 
-    public SurfaceUseEgl surface_egl;
+    public SurfaceNoCache surface_no_cache;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         game_mode();
         super.onCreate(savedInstanceState);
         resource = getResources();
-        setContentView(R.layout.activity_surface_egl);
-        surface_egl =findViewById(R.id.surface_egl);
-        surface_egl.setZOrderOnTop(true);
-        surface_egl.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        setContentView(R.layout.activity_surface_no_cache);
+        surface_no_cache =findViewById(R.id.surface_no_cache);
+        surface_no_cache.setZOrderOnTop(true);
+        surface_no_cache.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d("pbb add","surface no cache activity onDestroy");
         resource=null;
     }
 

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,14 +11,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.material.textfield.TextInputEditText;
-
-import java.util.Objects;
-
 import pbbadd.opengl.multitest.cube3d.Cube3DActivity;
 import pbbadd.opengl.multitest.egl.ActivityEGL;
-import pbbadd.opengl.multitest.surfaceview.ActivitySurfaceView;
-import pbbadd.opengl.multitest.surfaceview.ActivitySurfaceViewChoreographer;
+import pbbadd.opengl.multitest.resizableview.ActivityResizeableView;
+import pbbadd.opengl.multitest.surfaceegl.ActivitySurfaceEgl;
+import pbbadd.opengl.multitest.surfacenocache.ActivitySurfaceNoCache;
+import pbbadd.opengl.multitest.surfaceusecache.ActivitySurfaceUseCache;
+import pbbadd.opengl.multitest.surfaceviewchoregrapher.ActivitySurfaceViewChoreographer;
 import pbbadd.opengl.multitest.textureview.ActivityTextureview;
 import pbbadd.opengl.multitest.wallpaper.ActivityWallpaper;
 
@@ -27,15 +25,17 @@ public class MainActivity extends AppCompatActivity {
     private static final String log_tag = "main";
     private Button jump_to_tex_image_2d;
 
-    private Button jump_to_textureview=null;
-    private Button jump_to_egl=null;
-    private Button jump_to_cube3d=null;
+    private Button jump_to_textureview;
+    private Button jump_to_egl;
+    private Button jump_to_cube3d;
 
-    private Button jump_to_surface_view=null;
-    private Button jump_to_surface_view_choreographer=null;
+    private Button jump_to_surface_no_cache;
+    private Button jump_to_surface_use_cache;
+    private Button jump_to_surface_egl;
+    private Button jump_to_surface_choreographer;
 
-    private Button jump_to_wallpaper=null;
-
+    private Button jump_to_wallpaper;
+    private Button jump_to_resizeable_view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +56,12 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_textureview();
         init_jump_to_egl();
         init_jump_to_cube3d();
-        init_jump_to_surface_view();
+        init_jump_to_surface_no_cache();
+        init_jump_to_surface_use_cache();
+        init_jump_to_surface_egl();
         init_jump_to_surface_view_choreographer();
         init_jump_to_wallpaper();
+        init_jump_to_resizeable_view();
     }
 
     private void init_jump_to_textureview() {
@@ -88,18 +91,36 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void init_jump_to_surface_view() {
-        jump_to_surface_view=findViewById(R.id.button_jump_to_surface_view);
-        jump_to_surface_view.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, ActivitySurfaceView.class);
-            Log.d(log_tag,"jump to activity surface view");
+    private void init_jump_to_surface_no_cache() {
+        jump_to_surface_no_cache =findViewById(R.id.button_jump_to_surface_no_cache);
+        jump_to_surface_no_cache.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivitySurfaceNoCache.class);
+            Log.d(log_tag,"jump to activity surface no cache");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_surface_use_cache() {
+        jump_to_surface_use_cache =findViewById(R.id.button_jump_to_surface_use_cache);
+        jump_to_surface_use_cache.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivitySurfaceUseCache.class);
+            Log.d(log_tag,"jump to activity surface use cache");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_surface_egl() {
+        jump_to_surface_egl =findViewById(R.id.button_jump_to_surface_egl);
+        jump_to_surface_egl.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivitySurfaceEgl.class);
+            Log.d(log_tag,"jump to activity surface egl");
             startActivity(intent);
         });
     }
 
     private void init_jump_to_surface_view_choreographer() {
-        jump_to_surface_view_choreographer=findViewById(R.id.button_jump_to_surface_view_choreographer);
-        jump_to_surface_view_choreographer.setOnClickListener(v->{
+        jump_to_surface_choreographer =findViewById(R.id.button_jump_to_surface_choreographer);
+        jump_to_surface_choreographer.setOnClickListener(v->{
             Intent intent=new Intent(MainActivity.this, ActivitySurfaceViewChoreographer.class);
             Log.d(log_tag,"jump to activity surface view choreographer");
             startActivity(intent);
@@ -111,6 +132,15 @@ public class MainActivity extends AppCompatActivity {
         jump_to_wallpaper.setOnClickListener(v->{
             Intent intent=new Intent(MainActivity.this, ActivityWallpaper.class);
             Log.d(log_tag,"jump to activity wallpaper");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_resizeable_view() {
+        jump_to_resizeable_view=findViewById(R.id.button_jump_to_resizeable_view);
+        jump_to_resizeable_view.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivityResizeableView.class);
+            Log.d(log_tag,"jump to resizeable view");
             startActivity(intent);
         });
     }

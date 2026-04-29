@@ -1,4 +1,4 @@
-package pbbadd.opengl.multitest.surfaceview;
+package pbbadd.opengl.multitest.surfaceviewchoregrapher;
 
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
@@ -8,12 +8,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import pbbadd.opengl.multitest.R;
 
@@ -25,6 +19,7 @@ public class ActivitySurfaceViewChoreographer extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        game_mode();
         super.onCreate(savedInstanceState);
         resource = getResources();
         setContentView(R.layout.activity_surface_view_choreographer);

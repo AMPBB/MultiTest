@@ -36,20 +36,38 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
-            android:id="@+id/button_jump_to_surface_view"
-            android:text="surface view"
+            android:id="@+id/button_jump_to_surface_no_cache"
+            android:text="surface no cache"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
-            android:id="@+id/button_jump_to_surface_view_choreographer"
-            android:text="surface view choreographer"
+            android:id="@+id/button_jump_to_surface_use_cache"
+            android:text="surface use cache"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/button_jump_to_surface_choreographer"
+            android:text="surface choreographer"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/button_jump_to_surface_egl"
+            android:text="surface egl"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/button_jump_to_wallpaper"
             android:text="wallpaper"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/button_jump_to_resizeable_view"
+            android:text="resizeable view"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

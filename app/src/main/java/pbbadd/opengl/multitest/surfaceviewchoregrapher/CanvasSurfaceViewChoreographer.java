@@ -1,10 +1,9 @@
-package pbbadd.opengl.multitest.surfaceview;
+package pbbadd.opengl.multitest.surfaceviewchoregrapher;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
@@ -12,15 +11,12 @@ import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Choreographer;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import pbbadd.opengl.multitest.R;
@@ -28,18 +24,18 @@ import pbbadd.opengl.multitest.R;
 public class CanvasSurfaceViewChoreographer extends SurfaceView implements SurfaceHolder.Callback{
     public SurfaceHolder surface_holder;
 
-    public CanvasSurfaceViewChoreographer(Context c) {
-        super(c);
-        surface_holder=getHolder();
-        surface_holder.addCallback(this);
-        setLayerType(View.LAYER_TYPE_HARDWARE, null);
-    }
-
     public CanvasSurfaceViewChoreographer(Context c, AttributeSet a) {
         super(c, a);
+        init_bg();
+    }
+
+    private void init_bg() {
         surface_holder=getHolder();
         surface_holder.addCallback(this);
         setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false; // 关键：禁止系统缩放
+        bg = BitmapFactory.decodeResource(getResources(), R.drawable.c_bg_xxxxhd,options);
     }
 
     private int v_w,v_h;
@@ -48,26 +44,31 @@ public class CanvasSurfaceViewChoreographer extends SurfaceView implements Surfa
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
         v_w=width;v_h=height;
-        rectf_bg=new RectF(0.0f,0.0f,bg.getWidth(),bg.getHeight());
+        if(bg!=null) {
+            rectf_bg = new RectF(0.0f, 0.0f, bg.getWidth(), bg.getHeight());
+        }
         Log.d("pbb add","surface view size w="+v_w+",h="+v_h);
     }
 
     private Bitmap bg;
-    private SurfaceHolder sf_h;
     private boolean sf_h_running;
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        sf_h=holder;
+        Log.d("pbb add","surfaceCreated");
         holder.setFormat(PixelFormat.RGBA_8888); //force gpu accelerate
         if(bg==null) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inScaled = false; // 关键：禁止系统缩放
-            bg = BitmapFactory.decodeResource(ActivitySurfaceView.resource, R.drawable.c_bg_xxxxhd, options);
-
-            Log.d("pbb add","bg w,h"+bg.getWidth()+","+bg.getHeight());
+            bg = BitmapFactory.decodeResource(getResources(), R.drawable.c_bg_xxxxhd,options);
+            if(bg==null) {
+                Log.e("pbb add","failed to decode,bg is null");
+                return;
+            } else {
+                Log.d("pbb add", "bg w,h" + bg.getWidth() + "," + bg.getHeight());
+            }
         }
+        sf_h_running = true;
         choreographerStart();
-        sf_h_running=true;
     }
 
     @Override
@@ -80,7 +81,7 @@ public class CanvasSurfaceViewChoreographer extends SurfaceView implements Surfa
     }
 
     public void choreographerStart() {
-        SurfaceHolder draw_thread_surface_holder=sf_h;
+        SurfaceHolder draw_thread_surface_holder=surface_holder;
         class DrawOneFrame {
             int loc;
             Paint p;
@@ -110,7 +111,7 @@ public class CanvasSurfaceViewChoreographer extends SurfaceView implements Surfa
                     tc.drawLine(f_x,0,f_x,(float)v_h,p);
                 }
                 tc.drawText(""+loc,64,64,p);
-                Log.d("pbb add", "drawFrame: "+loc);
+//                Log.d("pbb add", "drawFrame: "+loc);
 
                 try {
                     c=draw_thread_surface_holder.lockCanvas();
