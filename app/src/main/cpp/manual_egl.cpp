@@ -10,9 +10,6 @@ static EGLContext me_eglContext = EGL_NO_CONTEXT;
 static EGLSurface me_eglSurface = EGL_NO_SURFACE;
 static EGLConfig  me_eglConfig;
 
-static EGLContext me_eglContext_empty = EGL_NO_CONTEXT;
-static EGLSurface me_eglSurface_empty = EGL_NO_SURFACE;
-
 static GLuint me_program = 0;
 static uint8_t* me_imagePixels = nullptr;
 // FBO 离屏渲染变量
@@ -249,11 +246,6 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglInit(
     me_eglSurface = eglCreateWindowSurface(me_eglDisplay, me_eglConfig, window, nullptr);
     eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext);
 
-    me_eglContext_empty = eglCreateContext(me_eglDisplay, me_eglConfig, EGL_NO_CONTEXT, ctxAttrs);
-    me_eglSurface_empty = eglCreateWindowSurface(me_eglDisplay, me_eglConfig, window, nullptr);
-//    eglMakeCurrent(me_eglDisplay, me_eglSurface_empty, me_eglSurface_empty, me_eglContext_empty);
-//    eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext_empty);
-
     me_createShader();
     me_createTexture();
 
@@ -295,12 +287,6 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_render(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_makeanothercontext(
-        JNIEnv *env, jobject thiz) {
-    eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext_empty);
-}
-
-extern "C" JNIEXPORT void JNICALL
 Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_recreateSurface(
         JNIEnv *env, jobject thiz, jobject jsurface)
 {
@@ -337,4 +323,53 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_recreateSurface(
 //    me_renderInternal(w,h);
 //    eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext_empty);
     ANativeWindow_release(newWindow);
+}
+
+static EGLDisplay mme_eglDisplay = EGL_NO_DISPLAY;
+static EGLContext mme_eglContext = EGL_NO_CONTEXT;
+static EGLSurface mme_eglSurface = EGL_NO_SURFACE;
+static EGLConfig  mme_eglConfig;
+
+extern "C" JNIEXPORT void JNICALL
+Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglinitanother(
+        JNIEnv *env, jobject thiz, jobject jsurface)
+{
+    ANativeWindow *window = ANativeWindow_fromSurface(env, jsurface);
+    int w = ANativeWindow_getWidth(window);
+    int h = ANativeWindow_getHeight(window);
+
+    mme_eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    eglInitialize(mme_eglDisplay, nullptr, nullptr);
+
+    EGLint configAttrs[] = {
+            EGL_RED_SIZE, 8,
+            EGL_GREEN_SIZE, 8,
+            EGL_BLUE_SIZE, 8,
+            EGL_ALPHA_SIZE, 8,
+            EGL_DEPTH_SIZE, 16,
+            EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+            EGL_NONE
+    };
+
+    EGLint numConfig;
+    eglChooseConfig(mme_eglDisplay, configAttrs, &mme_eglConfig, 1, &numConfig);
+
+    EGLint ctxAttrs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 2,
+            EGL_NONE
+    };
+    mme_eglContext = eglCreateContext(mme_eglDisplay, mme_eglConfig, EGL_NO_CONTEXT, ctxAttrs);
+    mme_eglSurface = eglCreateWindowSurface(mme_eglDisplay, mme_eglConfig, window, nullptr);
+    eglMakeCurrent(mme_eglDisplay, mme_eglSurface, mme_eglSurface, mme_eglContext);
+
+    glViewport(0, 0, w, h);
+    glClearColor(1.0f,0.0f,0.0f,0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ANativeWindow_release(window);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_makeanothercontext(
+        JNIEnv *env, jobject thiz) {
+    eglMakeCurrent(mme_eglDisplay, mme_eglSurface, mme_eglSurface, mme_eglContext);
 }

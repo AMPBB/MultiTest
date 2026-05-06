@@ -34,6 +34,7 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
     public native void recreateSurface(Surface surface);
     public native void render(int w,int h);
     public native void updateTexture(byte[] pixels, int width, int height);
+    public native void eglinitanother(Surface surface);
     public native void makeanothercontext();
 
     private Bitmap bgBitmap;
@@ -57,8 +58,13 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
             Log.d(tag, "surfaceCreated");
             resource_initialized=true;
 //            render(getWidth(),getHeight());
+//            make_another_egl_init();
             create_render(getWidth(),getHeight());
         }
+    }
+
+    public void make_another_egl_init() {
+        eglinitanother(getHolder().getSurface());
     }
 
     public void make_another_context() {
