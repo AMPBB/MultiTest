@@ -30,17 +30,42 @@
             android:inputType="number"
             android:text="256"/>
 
-        <!-- 确认按钮 -->
         <Button
             android:id="@+id/btn_apply"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="press to change"
             android:layout_marginTop="8dp"/>
+        <Button
+            android:id="@+id/btn_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="start"/>
+        <Button
+            android:id="@+id/btn_render_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="render start"/>
+        <Button
+            android:id="@+id/btn_make_another_context"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="another context"/>
 
-        <!-- OpenGL 渲染 View -->
-        <pbbadd.opengl.multitest.resizableview.ResizeableView
-            android:id="@+id/gl_surface_view"
+<!--        <TextView-->
+<!--            android:text="resizeable view"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"/>-->
+<!--        <pbbadd.opengl.multitest.resizableview.ResizeableView-->
+<!--            android:id="@+id/gl_surface_view"-->
+<!--            android:layout_width="256px"-->
+<!--            android:layout_height="256px"/>-->
+        <TextView
+            android:text="manual egl view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <pbbadd.opengl.multitest.resizableview.ManualEGLView
+            android:id="@+id/manual_egl_view"
             android:layout_width="256px"
             android:layout_height="256px"/>
 

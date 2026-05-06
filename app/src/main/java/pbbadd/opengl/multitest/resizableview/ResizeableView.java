@@ -9,6 +9,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLContext;
+import javax.microedition.khronos.egl.EGLDisplay;
+import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL10;
 
 import pbbadd.opengl.multitest.R;
@@ -20,6 +23,7 @@ public class ResizeableView extends GLSurfaceView implements GLSurfaceView.Rende
     public native void nativeOnDrawFrame();
     public native void onDrawOnlyTriangle();
     public native void nativeSetTextureData(byte[] pixels, int width, int height);
+    public native void recreateSurface(Object surface);
     private final String tag="resizeable view";
 
     public ResizeableView(Context context) {
@@ -43,17 +47,15 @@ public class ResizeableView extends GLSurfaceView implements GLSurfaceView.Rende
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        // 加载 drawable 中的 PNG 图片
         if(bg_res ==null) {
             bg_res = BitmapFactory.decodeResource(getResources(), R.drawable.resizable_view_res);
+            Log.d(tag,"bg create");
             if (bg_res != null) {
-                // 转换为 RGBA 像素数据
+                Log.d(tag,"create");
                 bg_pixels = new byte[bg_res.getWidth() * bg_res.getHeight() * 4];
                 bg_res.copyPixelsToBuffer(java.nio.ByteBuffer.wrap(bg_pixels));
                 nativeOnSurfaceCreated(bg_res.getWidth(), bg_res.getHeight());
-                // 传递像素数据到 Native
                 nativeSetTextureData(bg_pixels, bg_res.getWidth(), bg_res.getHeight());
-                nativeOnDrawFrame();
             }
         }
     }
@@ -64,17 +66,8 @@ public class ResizeableView extends GLSurfaceView implements GLSurfaceView.Rende
         Log.d(tag,"surface changed, vw="+vw+",vh="+vh);
     }
 
-    boolean is_first_draw=false;
     @Override
     public void onDrawFrame(GL10 gl) {
-//        nativeOnDrawFrame();
-        if(!is_first_draw) {
-            onDrawOnlyTriangle();
-//            is_first_draw=true;
-        }
-    }
-
-    public void manualDrawFrame() {
         nativeOnDrawFrame();
     }
 }

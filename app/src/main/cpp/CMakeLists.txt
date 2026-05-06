@@ -6,19 +6,16 @@ add_library(
         SHARED
         test_glTexImage2D_onscreen.cpp
         egl_create_wait_destroy_fence_sync.cpp
-        resizable_view.cpp)
+        resizable_view.cpp
+        manual_egl.cpp)
 
-find_library(
-        EGL-lib
-        EGL)
+find_library(EGL-lib EGL)
 
-find_library(
-        GLES3-lib
-        GLESv3)
+find_library(GLES3-lib GLESv3)
 
-find_library(
-        log-lib
-        log)
+find_library(log-lib log)
+
+find_library(android-lib android)
 
 target_link_libraries(
         gles30testdemo
@@ -27,7 +24,8 @@ target_link_libraries(
         ${EGL-lib}
         ${GLES3-lib}
         ${GLESv3}
-        ${log-lib})
+        ${log-lib}
+        ${android-lib})
 
 if(${ANDROID_ABI} STREQUAL "arm64-v8a")
     set_target_properties(gles30testdemo PROPERTIES
