@@ -43,7 +43,7 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
     private boolean render_start1=false;
     private Thread render_thread2;
     private boolean render_start2=true; //render_recreate() trigger create render_thread1
-    private final int render_interval=32;
+    private final int render_interval=256;
     private boolean resource_initialized=false;
     private boolean need_recreate=false;
     @Override
@@ -58,8 +58,8 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
             Log.d(tag, "surfaceCreated");
             resource_initialized=true;
 //            render(getWidth(),getHeight());
-//            make_another_egl_init();
             create_render(getWidth(),getHeight());
+            make_another_egl_init();
         }
     }
 
@@ -101,7 +101,7 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
                     }
                 }
             });
-            render_start1=true;
+//            render_start1=true;
             render_thread1.start();
         }
     }

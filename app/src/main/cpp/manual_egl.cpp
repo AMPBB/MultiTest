@@ -166,7 +166,6 @@ static void me_drawFBOToScreen(int screenW, int screenH)
     glEnableVertexAttribArray(texLoc);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-//    eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext);
     eglSwapBuffers(me_eglDisplay, me_eglSurface);
 }
 
@@ -275,13 +274,18 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_render(
         LOGE("pbbadd,render w or h error,%d-%d\n",w,h);
     }
     // ✅ 必须加！子线程渲染必须绑定上下文
-    if (me_eglDisplay == EGL_NO_DISPLAY ||
-        me_eglSurface == EGL_NO_SURFACE ||
-        me_eglContext == EGL_NO_CONTEXT) {
-        LOGE("pbbadd,egl error\n");
+    if (me_eglDisplay == EGL_NO_DISPLAY) {
+        LOGE("pbbadd,me_eglDisplay error\n");
         return;
     }
-//    eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext);
+    if (me_eglSurface == EGL_NO_SURFACE) {
+        LOGE("pbbadd,me_eglSurface error\n");
+        return;
+    }
+    if (me_eglContext == EGL_NO_CONTEXT) {
+        LOGE("pbbadd,me_eglContext error\n");
+        return;
+    }
     me_renderInternal(w,h);
     LOGD("pbbadd,render done\n");
 }
@@ -321,7 +325,6 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_recreateSurface(
 
     // 绘制
 //    me_renderInternal(w,h);
-//    eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext_empty);
     ANativeWindow_release(newWindow);
 }
 
