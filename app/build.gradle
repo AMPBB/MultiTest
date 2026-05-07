@@ -26,8 +26,23 @@ android {
             }
         }
     }
+    
+    signingConfigs {
+        debug {
+            // 指向项目根目录的统一调试签名文件
+            storeFile rootProject.file("debug.keystore")
+            // 默认调试签名密码（固定，不用改）
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
+    }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug // 关键配置
+            minifyEnabled false
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

@@ -135,7 +135,7 @@ public class ActivityResizeableView extends AppCompatActivity {
                                 width_c=200;
                             }
                         }
-                    });
+                    },"resize-s");
                     start_thread.start();
                     start_value = true;
                     Log.d(tag,"start done");

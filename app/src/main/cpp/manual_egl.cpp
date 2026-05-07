@@ -254,6 +254,25 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglInit(
 }
 
 extern "C" JNIEXPORT void JNICALL
+Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_egldeinit(
+        JNIEnv *env, jobject thiz)
+{
+    eglMakeCurrent(me_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    me_releaseFBO();
+    me_clear();
+    if (me_eglSurface != EGL_NO_SURFACE) {
+        eglDestroySurface(me_eglDisplay, me_eglSurface);
+        me_eglSurface = EGL_NO_SURFACE;
+    }
+
+    me_createShader();
+    me_createTexture();
+    glDeleteFramebuffers(1,&me_fboId);
+    glDeleteTextures(1,&me_fboTextureId);
+    glDeleteTextures(1,&me_originalTextureId);
+}
+
+extern "C" JNIEXPORT void JNICALL
 Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_updateTexture(
         JNIEnv *env, jobject thiz, jbyteArray pixels, jint width, jint height)
 {
@@ -286,6 +305,7 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_render(
         LOGE("pbbadd,me_eglContext error\n");
         return;
     }
+    eglMakeCurrent(me_eglDisplay,me_eglSurface,me_eglSurface,me_eglContext);
     me_renderInternal(w,h);
     LOGD("pbbadd,render done\n");
 }
