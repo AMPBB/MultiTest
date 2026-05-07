@@ -42,23 +42,19 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
     private byte[] bgPixels;
     private Thread render_thread;
     private boolean render_start=false;
-    private final int render_interval=256;
+    private int render_interval=1;
     private boolean resource_initialized=false;
     private boolean need_recreate=false;
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         if(!resource_initialized) {
-//            eglInit(holder.getSurface());
-            // 加载图片
             bgBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.resizable_view_res);
             bgPixels = new byte[bgBitmap.getWidth() * bgBitmap.getHeight() * 4];
             bgBitmap.copyPixelsToBuffer(java.nio.ByteBuffer.wrap(bgPixels));
-//            updateTexture(bgPixels, bgBitmap.getWidth(), bgBitmap.getHeight());
             Log.d(tag, "surfaceCreated");
             resource_initialized=true;
-//            render(getWidth(),getHeight());
             create_render(getWidth(),getHeight());
-            make_another_egl_init();
+//            make_another_egl_init();
         }
     }
 
@@ -72,6 +68,30 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
 
     public void set_need_recreate() {
         need_recreate=true;
+        render_interval=1;
+    }
+
+    private long recreate_delay=10;
+    public void set_need_recreate(long milli_second) {
+        set_need_recreate();
+        recreate_delay=milli_second;
+    }
+
+    public void busy_wait(long busy_time) {
+        long start = System.currentTimeMillis();
+        long current=System.currentTimeMillis();
+        long last=current;
+        while (true) {
+            current=System.currentTimeMillis();
+            if((current-start)>=busy_time) {
+                Log.d(tag, current + "-" + start);
+                break;
+            }
+            if(last!=current) {
+                Log.d(tag, current + "-" + start);
+                last=current;
+            }
+        }
     }
 
     public void create_render(int current_w, int current_h) {
@@ -82,8 +102,17 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
                 render(getWidth(), getHeight());
                 while(!render_destroy) {
                     if(need_recreate) {
+                        if(recreate_delay!=0) {
+                            Log.d(tag,"delay "+recreate_delay+" ms");
+                            busy_wait(recreate_delay);
+                            recreate_delay=0;
+                        }
                         recreateSurface(getHolder().getSurface());
                         need_recreate=false;
+                        Log.d(tag,"recreate done");
+                    }
+                    if(render_start) {
+                        Log.d(tag,"render started");
                     }
                     while (render_start) {
                         render(getWidth(), getHeight());
@@ -93,22 +122,24 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
                             throw new RuntimeException(e);
                         }
                     }
-                    try {
-                        Thread.sleep(render_interval*10);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+//                    Log.d(tag,"render stopped");
+//                    try {
+//                        Thread.sleep(render_interval);
+//                    } catch (InterruptedException e) {
+//                        throw new RuntimeException(e);
+//                    }
                 }
             },"render-s");
-//            render_start1=true;
             render_thread.start();
         }
     }
 
     private boolean render_destroy=false;
     public void render_start(int current_w, int current_h) {
-        if(render_thread !=null) {
-            render_start =true;
+        if(render_thread!=null) {
+            render_start=true;
+        } else {
+            Log.e(tag,"render_thread is null");
         }
     }
 

@@ -305,7 +305,7 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_render(
         LOGE("pbbadd,me_eglContext error\n");
         return;
     }
-    eglMakeCurrent(me_eglDisplay,me_eglSurface,me_eglSurface,me_eglContext);
+//    eglMakeCurrent(me_eglDisplay,me_eglSurface,me_eglSurface,me_eglContext);
     me_renderInternal(w,h);
     LOGD("pbbadd,render done\n");
 }
@@ -315,21 +315,15 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_recreateSurface(
         JNIEnv *env, jobject thiz, jobject jsurface)
 {
     ANativeWindow *newWindow = ANativeWindow_fromSurface(env, jsurface);
-    // ✅ 修复视口
-    int w = ANativeWindow_getWidth(newWindow);
-    int h = ANativeWindow_getHeight(newWindow);
-
     eglMakeCurrent(me_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     me_releaseFBO();
     me_clear();
 
-    // 2. 销毁旧surface
     if (me_eglSurface != EGL_NO_SURFACE) {
         eglDestroySurface(me_eglDisplay, me_eglSurface);
         me_eglSurface = EGL_NO_SURFACE;
     }
 
-    // 3. 创建新surface
     me_eglSurface = eglCreateWindowSurface(
             me_eglDisplay,
             me_eglConfig,
@@ -337,14 +331,7 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_recreateSurface(
             nullptr
     );
 
-    // 4. 绑定新surface
     eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext);
-
-//    me_createFBO(w,h);
-//    glViewport(0, 0, w, h);
-
-    // 绘制
-//    me_renderInternal(w,h);
     ANativeWindow_release(newWindow);
 }
 

@@ -59,29 +59,26 @@ public class ActivityResizeableView extends AppCompatActivity {
         make_another_context_set();
     }
 
+    private boolean applying=false;
     public void apply_set() {
         // 按钮点击事件：动态修改 View 宽高
         apply.setOnClickListener(v -> {
             try {
-                apply.setClickable(false);
+                if(applying) {
+                    Log.e(tag,"applying, wait!");
+                    return;
+                }
+                applying=true;
                 etWidth.clearFocus();
                 etHeight.clearFocus();
                 hideKeyboard();
 
                 int width = Integer.parseInt(etWidth.getText().toString());
                 int height = Integer.parseInt(etHeight.getText().toString());
-
-                // 更新 OpenGL View 的布局宽高
-//                glSurfaceView.setLayoutParams(new LinearLayout.LayoutParams(width, height));
-//                glSurfaceView.requestLayout(); // 刷新布局
-
-//                glSurfaceView.post(() -> {
-//                    glSurfaceView.recreateSurface(glSurfaceView.getHolder().getSurface());
-//                });
-
                 manual_egl_view_update(width,height);
+                manual_egl_view.set_need_recreate(20);
 
-                apply.setClickable(true);
+                applying=false;
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
@@ -93,13 +90,10 @@ public class ActivityResizeableView extends AppCompatActivity {
         imm.hideSoftInputFromWindow(etWidth.getWindowToken(), 0);
     }
     private void manual_egl_view_update(int w,int h) {
+        Log.d(tag,"requestLayout start");
         manual_egl_view.setLayoutParams(new LinearLayout.LayoutParams(w, h));
-        manual_egl_view.requestLayout(); // 刷新布局
-        manual_egl_view.post(()->{
-//            manual_egl_view.recreateSurface(manual_egl_view.getHolder().getSurface());
-//            manual_egl_view.render_recreate();
-            manual_egl_view.set_need_recreate();
-        });
+        manual_egl_view.requestLayout();
+        Log.d(tag,"requestLayout done");
     }
     public boolean start_value=false;
     public Thread start_thread;
@@ -121,6 +115,7 @@ public class ActivityResizeableView extends AppCompatActivity {
                         while(start_value) {
                             final int width_c_f=width_c;
                             runOnUiThread(()->{
+                                manual_egl_view.set_need_recreate();
                                 manual_egl_view_update(width_c_f, 400);
                             });
                             current_w=width_c_f;
@@ -172,6 +167,7 @@ public class ActivityResizeableView extends AppCompatActivity {
 
     public void make_another_context_set() {
         make_another_context.setOnClickListener(v->{
+            manual_egl_view.make_another_egl_init();
             manual_egl_view.make_another_context();
         });
     }
