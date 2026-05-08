@@ -30,9 +30,9 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
         getHolder().addCallback(this); // 监听surface创建
     }
 
-    public native void eglInit(Surface surface);
+    public native void eglinit(Surface surface);
     public native void egldeinit();
-    public native void recreateSurface(Surface surface);
+    public native void resize(Surface surface);
     public native void render(int w,int h);
     public native void updateTexture(byte[] pixels, int width, int height);
     public native void eglinitanother(Surface surface);
@@ -97,7 +97,7 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
     public void create_render(int current_w, int current_h) {
         if(render_thread ==null) {
             render_thread =new Thread(()->{
-                eglInit(getHolder().getSurface());
+                eglinit(getHolder().getSurface());
                 updateTexture(bgPixels, bgBitmap.getWidth(), bgBitmap.getHeight());
                 render(getWidth(), getHeight());
                 while(!render_destroy) {
@@ -107,7 +107,7 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
                             busy_wait(recreate_delay);
                             recreate_delay=0;
                         }
-                        recreateSurface(getHolder().getSurface());
+                        resize(getHolder().getSurface());
                         need_recreate=false;
                         Log.d(tag,"recreate done");
                     }
@@ -155,8 +155,6 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
     }
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
+        Log.d(tag,"surfaceChanged");
     }
-
-
 }

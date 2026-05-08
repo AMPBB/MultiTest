@@ -5,22 +5,25 @@
 #include <android/native_window_jni.h>
 #include "common_include_and_log.h"
 
-static EGLDisplay me_eglDisplay = EGL_NO_DISPLAY;
-static EGLContext me_eglContext = EGL_NO_CONTEXT;
-static EGLSurface me_eglSurface = EGL_NO_SURFACE;
-static EGLConfig  me_eglConfig;
+__thread static GLuint origin_fbo_id;
+__thread static GLuint origin_tex_id;
+__thread static GLuint offscreen_fbo_id;
+__thread static GLuint offscreen_tex_id;
+__thread static ANativeWindow *window= nullptr;
+__thread static int vw,vh;
 
-static GLuint me_program = 0;
-static uint8_t* me_imagePixels = nullptr;
-// FBO 离屏渲染变量
-static GLuint me_fboId = 0;
-static GLuint me_fboTextureId      = 0; // FBO离屏纹理
-static GLuint me_originalTextureId = 0; // 你的图片纹理（真正的图）
+__thread static EGLDisplay common_egl_display = EGL_NO_DISPLAY;
+__thread static EGLContext common_egl_context = EGL_NO_CONTEXT;
+__thread static EGLSurface common_egl_surface = EGL_NO_SURFACE;
+__thread static EGLConfig  me_eglConfig;
 
-// ==========================
-// ✅ 修复：正确的着色器
-// ==========================
-static const char* me_vertexShader = R"(
+__thread static GLuint common_program = 0;
+__thread static uint8_t* me_imagePixels = nullptr;
+__thread static GLuint me_fboId = 0;
+__thread static GLuint me_fboTextureId      = 0; // FBO离屏纹理
+__thread static GLuint me_originalTextureId = 0; // 你的图片纹理（真正的图）
+
+static const char* common_vertex_shader = R"(
     attribute vec2 aPos;
     attribute vec2 aTexCoord;
     varying vec2 vTexCoord;
@@ -30,7 +33,7 @@ static const char* me_vertexShader = R"(
     }
 )";
 
-static const char* me_fragmentShader = R"(
+static const char* common_fragment_shader = R"(
     precision mediump float;
     varying vec2 vTexCoord;
     uniform sampler2D uTexture;
@@ -39,7 +42,6 @@ static const char* me_fragmentShader = R"(
     }
 )";
 
-// 顶点坐标（不变，负责画到屏幕哪里）
 static float me_vertices_pos[] = {
         -1.0f,  1.0f,
         1.0f,  1.0f,
@@ -47,183 +49,151 @@ static float me_vertices_pos[] = {
         1.0f, -1.0f,
 };
 
-// 纹理坐标 → 正常图片（不使用FBO时）
-static float me_vertices_uv[] = {
-        0.0f, 0.0f,
-        1.0f, 0.0f,
+static float me_vertices_uv_flipped[] = {
         0.0f, 1.0f,
         1.0f, 1.0f,
-};
-
-// 纹理坐标 → FBO 必须翻转（解决倒置！）
-static float me_vertices_uv_flipped[] = {
-        0.0f, 1.0f,  // ← 翻转
-        1.0f, 1.0f,  // ← 翻转
         0.0f, 0.0f,
         1.0f, 0.0f,
 };
 
-static void me_createFBO(int w,int h)
-{
-    // 1. 创建 FBO
-    glGenFramebuffers(1, &me_fboId);
-    // 2. 创建 FBO 绑定的颜色纹理
-    glGenTextures(1, &me_fboTextureId);
-
-    // 配置离线纹理
-    glBindTexture(GL_TEXTURE_2D, me_fboTextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                 w, h,
-                 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
+static void offscreen_res_create(int w,int h) {
+    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING,(GLint*)&origin_fbo_id);
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&origin_tex_id);
+    glGenFramebuffers(1,&offscreen_fbo_id);
+    glGenTextures(1,&offscreen_tex_id);
+    glBindTexture(GL_TEXTURE_2D, offscreen_tex_id);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    // 3. 绑定 FBO，把纹理挂载到 FBO 颜色附件
-    glBindFramebuffer(GL_FRAMEBUFFER, me_fboId);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                           GL_TEXTURE_2D, me_fboTextureId, 0);
-
-    // 4. 校验 FBO 完整性（必加，防止配置错）
+    glBindFramebuffer(GL_FRAMEBUFFER, offscreen_fbo_id);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, offscreen_tex_id, 0);
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if(status != GL_FRAMEBUFFER_COMPLETE)
     {
-        // FBO 初始化失败
+        LOGE("check failed\n");
+        glDeleteTextures(1,&offscreen_tex_id);
+        glDeleteFramebuffers(1,&offscreen_fbo_id);
+        return;
     }
-
-    // 解绑，切回屏幕默认帧缓冲 0
+    glBindFramebuffer(GL_FRAMEBUFFER, origin_fbo_id);
+    glBindTexture(GL_TEXTURE_2D, origin_tex_id);
+    LOGD("done\n");
+}
+static void offscreen_res_destroy() {
+    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING,(GLint*)&origin_fbo_id);
+    glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&origin_tex_id);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-// 安全释放旧的 FBO 资源
-static void me_releaseFBO() {
-    // 一定要先解绑！
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // 删除 FBO
-    if (me_fboId != 0) {
-        glDeleteFramebuffers(1, &me_fboId);
-        me_fboId = 0;
+    if (offscreen_fbo_id != 0) {
+        glDeleteFramebuffers(1, &offscreen_fbo_id);
+        offscreen_fbo_id = 0;
     }
-
-    // 删除 FBO 附着的纹理
-    if (me_fboTextureId != 0) {
-        glDeleteTextures(1, &me_fboTextureId);
-        me_fboTextureId = 0;
+    if (offscreen_tex_id != 0) {
+        glDeleteTextures(1, &offscreen_tex_id);
+        offscreen_tex_id = 0;
+    }
+    if(origin_fbo_id!=offscreen_fbo_id) {
+        glBindFramebuffer(GL_FRAMEBUFFER, origin_fbo_id);
+    }
+    if(origin_tex_id!=offscreen_tex_id) {
+        glBindTexture(GL_TEXTURE_2D, origin_tex_id);
     }
 }
 
-// 先渲染到 FBO 离屏
-static void me_renderToFBO(int screenW, int screenH)
-{
-    glBindFramebuffer(GL_FRAMEBUFFER, me_fboId);
-    glViewport(0, 0, screenW, screenH);
-    glClearColor(0.8f, 0.6f, 0.0f, 0.0f);
+static void common_clear() {
+    glClearColor(0.8,0.6,0.0f,0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-
-    glUseProgram(me_program);
-
-    // ✅ 必须绑定原始图片！！！
-    glBindTexture(GL_TEXTURE_2D, me_originalTextureId);
-
-    // 顶点
-    GLint posLoc = glGetAttribLocation(me_program, "aPos");
-    glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_pos);
-    glEnableVertexAttribArray(posLoc);
-
-    // 正常UV
-    GLint texLoc = glGetAttribLocation(me_program, "aTexCoord");
-    glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_uv);
-    glEnableVertexAttribArray(texLoc);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-// 把 FBO 离线纹理 绘制到手机屏幕
-static void me_drawFBOToScreen(int screenW, int screenH)
-{
-    glViewport(0, 0, screenW, screenH);
-    glClearColor(0.6f, 0.8f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+static void offscreen_clear(int w,int h) {
+    vw=w,vh=h;
+    glViewport(0,0,vw,vh);
+    common_clear();
+}
 
-    glUseProgram(me_program);
+static void offscreen_bind() {
+    glBindFramebuffer(GL_FRAMEBUFFER,offscreen_fbo_id);
+    glBindTexture(GL_TEXTURE_2D,offscreen_tex_id);
+}
 
-    // ✅ 这里才绑 FBO 纹理（用来显示）
-    glBindTexture(GL_TEXTURE_2D, me_fboTextureId);
-
-    // 顶点
-    GLint posLoc = glGetAttribLocation(me_program, "aPos");
+static void offscreen_draw() {
+    glUseProgram(common_program);
+    GLint posLoc = glGetAttribLocation(common_program, "aPos");
     glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_pos);
     glEnableVertexAttribArray(posLoc);
-
-    // ✅ FBO 必须翻转
-    GLint texLoc = glGetAttribLocation(me_program, "aTexCoord");
+    GLint texLoc = glGetAttribLocation(common_program, "aTexCoord");
     glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_uv_flipped);
     glEnableVertexAttribArray(texLoc);
-
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    eglSwapBuffers(me_eglDisplay, me_eglSurface);
 }
 
-static void me_clear() {
-    glClearColor(1.0f, 0.8f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+static void offscreen_render() {
+//    offscreen_clear();
+    offscreen_bind();
+    offscreen_draw();
 }
 
-static void me_renderInternal(int screenW, int screenH)
-{
-    me_releaseFBO();
-    me_createFBO(screenW, screenH);
-
-    glViewport(0, 0, screenW, screenH);
-    glClearColor(0.5f,0.5f,0.0f,0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    me_renderToFBO(screenW, screenH);
-    me_drawFBOToScreen(screenW, screenH);
+static void offscreen_2_screen() {
+//    offscreen_clear();
+    eglSwapBuffers(common_egl_display, common_egl_surface);
 }
 
-static void me_createShader() {
+static bool offscreen_render_check(int w,int h) {
+    bool res=true;
+    if(vw <= 0 || vh <= 0) {
+        LOGE("render w or h error,%d-%d\n",w,h);
+        res=false;
+    }
+    if (common_egl_display == EGL_NO_DISPLAY) {
+        LOGE("common_egl_display error\n");
+        res=false;
+    }
+    if (common_egl_surface == EGL_NO_SURFACE) {
+        LOGE("common_egl_surface error\n");
+        res=false;
+    }
+    if (common_egl_context == EGL_NO_CONTEXT) {
+        LOGE("common_egl_context error\n");
+        res=false;
+    }
+    return res;
+}
+
+static void offscreen_render_and_to_screen() {
+//    eglMakeCurrent(common_egl_display,common_egl_surface,common_egl_surface,common_egl_context);
+    offscreen_res_destroy();
+    offscreen_res_create(vw,vh);
+    offscreen_render();
+    offscreen_2_screen();
+    LOGD("done\n");
+}
+
+static void common_program_create() {
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &me_vertexShader, nullptr);
+    glShaderSource(vs, 1, &common_vertex_shader, nullptr);
     glCompileShader(vs);
-
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &me_fragmentShader, nullptr);
+    glShaderSource(fs, 1, &common_fragment_shader, nullptr);
     glCompileShader(fs);
-
-    me_program = glCreateProgram();
-    glAttachShader(me_program, vs);
-    glAttachShader(me_program, fs);
-    glLinkProgram(me_program);
-
+    common_program = glCreateProgram();
+    glAttachShader(common_program, vs);
+    glAttachShader(common_program, fs);
+    glLinkProgram(common_program);
     glDeleteShader(vs);
     glDeleteShader(fs);
 }
 
-static void me_createTexture() {
-    glGenTextures(1, &me_originalTextureId);
-    glBindTexture(GL_TEXTURE_2D, me_originalTextureId);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+static void common_program_destroy() {
+    glDeleteProgram(common_program);
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglInit(
-        JNIEnv *env, jobject thiz, jobject jsurface)
-{
-    ANativeWindow *window = ANativeWindow_fromSurface(env, jsurface);
-    // ✅ 强制设置视口
-    int w = ANativeWindow_getWidth(window);
-    int h = ANativeWindow_getHeight(window);
-
-    me_eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    eglInitialize(me_eglDisplay, nullptr, nullptr);
-
+static void common_egl_init() {
+    vw = ANativeWindow_getWidth(window);
+    vh = ANativeWindow_getHeight(window);
+    common_egl_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    eglInitialize(common_egl_display, nullptr, nullptr);
     EGLint configAttrs[] = {
             EGL_RED_SIZE, 8,
             EGL_GREEN_SIZE, 8,
@@ -233,48 +203,53 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglInit(
             EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
             EGL_NONE
     };
-
     EGLint numConfig;
-    eglChooseConfig(me_eglDisplay, configAttrs, &me_eglConfig, 1, &numConfig);
-
+    eglChooseConfig(common_egl_display, configAttrs, &me_eglConfig, 1, &numConfig);
     EGLint ctxAttrs[] = {
             EGL_CONTEXT_CLIENT_VERSION, 2,
             EGL_NONE
     };
-    me_eglContext = eglCreateContext(me_eglDisplay, me_eglConfig, EGL_NO_CONTEXT, ctxAttrs);
-    me_eglSurface = eglCreateWindowSurface(me_eglDisplay, me_eglConfig, window, nullptr);
-    eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext);
+    common_egl_context = eglCreateContext(common_egl_display, me_eglConfig, EGL_NO_CONTEXT, ctxAttrs);
+    common_egl_surface = eglCreateWindowSurface(common_egl_display, me_eglConfig, window, nullptr);
+    eglMakeCurrent(common_egl_display, common_egl_surface, common_egl_surface, common_egl_context);
+    common_program_create();
 
-    me_createShader();
-    me_createTexture();
-
-    glViewport(0, 0, w, h);
-    me_createFBO(w,h);   // 初始化FBO
+    glViewport(0, 0, vw, vh);
+    offscreen_res_create(vw,vh);
     ANativeWindow_release(window);
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_egldeinit(
-        JNIEnv *env, jobject thiz)
-{
-    eglMakeCurrent(me_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    me_releaseFBO();
-    me_clear();
-    if (me_eglSurface != EGL_NO_SURFACE) {
-        eglDestroySurface(me_eglDisplay, me_eglSurface);
-        me_eglSurface = EGL_NO_SURFACE;
+static void common_egl_deinit() {
+    eglMakeCurrent(common_egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    offscreen_res_destroy();
+    common_clear();
+    if (common_egl_surface != EGL_NO_SURFACE) {
+        eglDestroySurface(common_egl_display, common_egl_surface);
+        common_egl_surface = EGL_NO_SURFACE;
     }
 
-    me_createShader();
-    me_createTexture();
+    common_program_destroy();
     glDeleteFramebuffers(1,&me_fboId);
     glDeleteTextures(1,&me_fboTextureId);
     glDeleteTextures(1,&me_originalTextureId);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_updateTexture(
-        JNIEnv *env, jobject thiz, jbyteArray pixels, jint width, jint height)
+Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglinit(JNIEnv *env, jobject thiz, jobject jsurface)
+{
+    window = ANativeWindow_fromSurface(env, jsurface);
+    common_egl_init();
+    ANativeWindow_release(window);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_egldeinit(JNIEnv *env, jobject thiz)
+{
+    common_egl_deinit();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_updateTexture(JNIEnv *env, jobject thiz, jbyteArray pixels, jint width, jint height)
 {
     int size = width * height * 4;
     me_imagePixels = new uint8_t[size];
@@ -286,52 +261,35 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_updateTexture(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_render(
-        JNIEnv *env, jobject thiz,jint w,jint h)
+Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_render(JNIEnv *env, jobject thiz,jint w,jint h)
 {
-    if(w <= 0 || h <= 0) {
-        LOGE("pbbadd,render w or h error,%d-%d\n",w,h);
+    if(offscreen_render_check(w,h)) {
+        offscreen_render_and_to_screen();
     }
-    // ✅ 必须加！子线程渲染必须绑定上下文
-    if (me_eglDisplay == EGL_NO_DISPLAY) {
-        LOGE("pbbadd,me_eglDisplay error\n");
-        return;
-    }
-    if (me_eglSurface == EGL_NO_SURFACE) {
-        LOGE("pbbadd,me_eglSurface error\n");
-        return;
-    }
-    if (me_eglContext == EGL_NO_CONTEXT) {
-        LOGE("pbbadd,me_eglContext error\n");
-        return;
-    }
-//    eglMakeCurrent(me_eglDisplay,me_eglSurface,me_eglSurface,me_eglContext);
-    me_renderInternal(w,h);
-    LOGD("pbbadd,render done\n");
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_recreateSurface(
+Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_resize(
         JNIEnv *env, jobject thiz, jobject jsurface)
 {
     ANativeWindow *newWindow = ANativeWindow_fromSurface(env, jsurface);
-    eglMakeCurrent(me_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-    me_releaseFBO();
-    me_clear();
+    eglMakeCurrent(common_egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    offscreen_res_destroy();
+    common_clear();
 
-    if (me_eglSurface != EGL_NO_SURFACE) {
-        eglDestroySurface(me_eglDisplay, me_eglSurface);
-        me_eglSurface = EGL_NO_SURFACE;
+    if (common_egl_surface != EGL_NO_SURFACE) {
+        eglDestroySurface(common_egl_display, common_egl_surface);
+        common_egl_surface = EGL_NO_SURFACE;
     }
 
-    me_eglSurface = eglCreateWindowSurface(
-            me_eglDisplay,
+    common_egl_surface = eglCreateWindowSurface(
+            common_egl_display,
             me_eglConfig,
             newWindow,
             nullptr
     );
 
-    eglMakeCurrent(me_eglDisplay, me_eglSurface, me_eglSurface, me_eglContext);
+    eglMakeCurrent(common_egl_display, common_egl_surface, common_egl_surface, common_egl_context);
     ANativeWindow_release(newWindow);
 }
 

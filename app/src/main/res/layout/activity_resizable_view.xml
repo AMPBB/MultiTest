@@ -24,7 +24,6 @@
                 android:hint="width"
                 android:inputType="number"
                 android:text="800"/>
-
             <EditText
                 android:id="@+id/et_height"
                 android:layout_width="wrap_content"
@@ -55,12 +54,6 @@
                 android:layout_height="wrap_content"
                 android:text="another context"/>
         </LinearLayout>
-
-
-        <TextView
-            android:text="manual egl view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -69,12 +62,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+                <TextView
+                    android:text="manual egl view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
                 <pbbadd.opengl.multitest.resizableview.ManualEGLView
                     android:id="@+id/manual_egl_view"
                     android:layout_width="256px"
                     android:layout_height="256px"/>
                 <TextView
-                    android:text="follo used to increase layout time!"
+                    android:text="follow used to increase layout time!"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
                 <pbbadd.opengl.multitest.resizableview.SlowLayoutView
@@ -82,7 +79,5 @@
                     android:layout_height="666dp"/>
             </LinearLayout>
         </ScrollView>
-
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
