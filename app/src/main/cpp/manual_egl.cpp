@@ -9,6 +9,7 @@ __thread static GLuint origin_fbo_id;
 __thread static GLuint origin_tex_id;
 __thread static GLuint offscreen_fbo_id;
 __thread static GLuint offscreen_tex_id;
+__thread static GLuint update_tex_id;
 __thread static ANativeWindow *window= nullptr;
 __thread static int vw,vh;
 
@@ -18,10 +19,6 @@ __thread static EGLSurface common_egl_surface = EGL_NO_SURFACE;
 __thread static EGLConfig  me_eglConfig;
 
 __thread static GLuint common_program = 0;
-__thread static uint8_t* me_imagePixels = nullptr;
-__thread static GLuint me_fboId = 0;
-__thread static GLuint me_fboTextureId      = 0; // FBO离屏纹理
-__thread static GLuint me_originalTextureId = 0; // 你的图片纹理（真正的图）
 
 static const char* common_vertex_shader = R"(
     attribute vec2 aPos;
@@ -49,6 +46,13 @@ static float me_vertices_pos[] = {
         1.0f, -1.0f,
 };
 
+static float me_vertices_uv[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+};
+
 static float me_vertices_uv_flipped[] = {
         0.0f, 1.0f,
         1.0f, 1.0f,
@@ -57,8 +61,6 @@ static float me_vertices_uv_flipped[] = {
 };
 
 static void offscreen_res_create(int w,int h) {
-    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING,(GLint*)&origin_fbo_id);
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, (GLint*)&origin_tex_id);
     glGenFramebuffers(1,&offscreen_fbo_id);
     glGenTextures(1,&offscreen_tex_id);
     glBindTexture(GL_TEXTURE_2D, offscreen_tex_id);
@@ -77,8 +79,6 @@ static void offscreen_res_create(int w,int h) {
         glDeleteFramebuffers(1,&offscreen_fbo_id);
         return;
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, origin_fbo_id);
-    glBindTexture(GL_TEXTURE_2D, origin_tex_id);
     LOGD("done\n");
 }
 static void offscreen_res_destroy() {
@@ -94,10 +94,10 @@ static void offscreen_res_destroy() {
         glDeleteTextures(1, &offscreen_tex_id);
         offscreen_tex_id = 0;
     }
-    if(origin_fbo_id!=offscreen_fbo_id) {
+    if(origin_fbo_id!=0) {
         glBindFramebuffer(GL_FRAMEBUFFER, origin_fbo_id);
     }
-    if(origin_tex_id!=offscreen_tex_id) {
+    if(origin_tex_id!=0) {
         glBindTexture(GL_TEXTURE_2D, origin_tex_id);
     }
 }
@@ -113,25 +113,28 @@ static void offscreen_clear(int w,int h) {
     common_clear();
 }
 
-static void offscreen_bind() {
-    glBindFramebuffer(GL_FRAMEBUFFER,offscreen_fbo_id);
-    glBindTexture(GL_TEXTURE_2D,offscreen_tex_id);
-}
-
-static void offscreen_draw() {
+static void common_draw() {
     glUseProgram(common_program);
     GLint posLoc = glGetAttribLocation(common_program, "aPos");
     glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_pos);
     glEnableVertexAttribArray(posLoc);
     GLint texLoc = glGetAttribLocation(common_program, "aTexCoord");
-    glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_uv_flipped);
+    glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_uv);
+//    glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_uv_flipped);
     glEnableVertexAttribArray(texLoc);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
+static void offscreen_draw() {
+    glBindFramebuffer(GL_FRAMEBUFFER,offscreen_fbo_id);
+    glBindTexture(GL_TEXTURE_2D,update_tex_id);
+    common_draw();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D,offscreen_tex_id);
+    common_draw();
+}
+
 static void offscreen_render() {
-//    offscreen_clear();
-    offscreen_bind();
     offscreen_draw();
 }
 
@@ -163,8 +166,8 @@ static bool offscreen_render_check(int w,int h) {
 
 static void offscreen_render_and_to_screen() {
 //    eglMakeCurrent(common_egl_display,common_egl_surface,common_egl_surface,common_egl_context);
-    offscreen_res_destroy();
-    offscreen_res_create(vw,vh);
+//    offscreen_res_destroy();
+//    offscreen_res_create(vw,vh);
     offscreen_render();
     offscreen_2_screen();
     LOGD("done\n");
@@ -216,7 +219,17 @@ static void common_egl_init() {
 
     glViewport(0, 0, vw, vh);
     offscreen_res_create(vw,vh);
-    ANativeWindow_release(window);
+    glGenTextures(1,&update_tex_id);
+    glBindTexture(GL_TEXTURE_2D, update_tex_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    int size=vw*vh*4;
+    auto *update_pixels=new uint8_t[size];
+    LOGD("vw=%d,vh=%d,size=%d\n",vw,vh,size);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vw, vh, 0, GL_RGBA, GL_UNSIGNED_BYTE, update_pixels);
+    delete[] update_pixels;
 }
 
 static void common_egl_deinit() {
@@ -229,9 +242,13 @@ static void common_egl_deinit() {
     }
 
     common_program_destroy();
-    glDeleteFramebuffers(1,&me_fboId);
-    glDeleteTextures(1,&me_fboTextureId);
-    glDeleteTextures(1,&me_originalTextureId);
+    glDeleteTextures(1,&update_tex_id);
+}
+
+static void common_update_tex_image_2d(GLbyte *pixels, int w, int h) {
+    glBindTexture(GL_TEXTURE_2D,update_tex_id);
+    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,pixels);
+//    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,w,h,0,GL_RGBA,GL_UNSIGNED_BYTE,pixels);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -239,7 +256,7 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglinit(JNIEnv *env, jo
 {
     window = ANativeWindow_fromSurface(env, jsurface);
     common_egl_init();
-    ANativeWindow_release(window);
+//    ANativeWindow_release(window);
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -249,15 +266,14 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_egldeinit(JNIEnv *env, 
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_updateTexture(JNIEnv *env, jobject thiz, jbyteArray pixels, jint width, jint height)
+Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_updateTexture(JNIEnv *env, jobject thiz, jbyteArray pixels, jint w, jint h)
 {
-    int size = width * height * 4;
-    me_imagePixels = new uint8_t[size];
-    env->GetByteArrayRegion(pixels, 0, size, (jbyte*)me_imagePixels);
-
-    glBindTexture(GL_TEXTURE_2D, me_originalTextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, me_imagePixels);
+    int size=w*h*4;
+    auto *update_pixels=new uint8_t[size];
+    env->GetByteArrayRegion(pixels, 0, size, (jbyte*)update_pixels);
+    LOGD("w=%d,h=%d,size=%d\n",w,h,size);
+    common_update_tex_image_2d((GLbyte*)update_pixels,w,h);
+    delete[] update_pixels;
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -272,7 +288,12 @@ extern "C" JNIEXPORT void JNICALL
 Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_resize(
         JNIEnv *env, jobject thiz, jobject jsurface)
 {
-    ANativeWindow *newWindow = ANativeWindow_fromSurface(env, jsurface);
+    if(window!= nullptr) {
+        ANativeWindow_release(window);
+    }
+    window = ANativeWindow_fromSurface(env, jsurface);
+    vw = ANativeWindow_getWidth(window);
+    vh = ANativeWindow_getHeight(window);
     eglMakeCurrent(common_egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     offscreen_res_destroy();
     common_clear();
@@ -285,13 +306,25 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_resize(
     common_egl_surface = eglCreateWindowSurface(
             common_egl_display,
             me_eglConfig,
-            newWindow,
+            window,
             nullptr
     );
 
     eglMakeCurrent(common_egl_display, common_egl_surface, common_egl_surface, common_egl_context);
-    ANativeWindow_release(newWindow);
+    offscreen_res_create(vw,vh);
+    glViewport(0,0,vw,vh);
+//    ANativeWindow_release(window);
 }
+
+
+
+
+
+
+
+
+
+
 
 static EGLDisplay mme_eglDisplay = EGL_NO_DISPLAY;
 static EGLContext mme_eglContext = EGL_NO_CONTEXT;

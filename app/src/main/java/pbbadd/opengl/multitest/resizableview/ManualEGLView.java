@@ -48,7 +48,9 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
         if(!resource_initialized) {
-            bgBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.resizable_view_res);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inScaled = false; // 关键：禁止系统缩放
+            bgBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.resizable_view_res,options);
             bgPixels = new byte[bgBitmap.getWidth() * bgBitmap.getHeight() * 4];
             bgBitmap.copyPixelsToBuffer(java.nio.ByteBuffer.wrap(bgPixels));
             Log.d(tag, "surfaceCreated");
@@ -99,7 +101,7 @@ public class ManualEGLView extends SurfaceView implements SurfaceHolder.Callback
             render_thread =new Thread(()->{
                 eglinit(getHolder().getSurface());
                 updateTexture(bgPixels, bgBitmap.getWidth(), bgBitmap.getHeight());
-                render(getWidth(), getHeight());
+//                render(getWidth(), getHeight());
                 while(!render_destroy) {
                     if(need_recreate) {
                         if(recreate_delay!=0) {
