@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import pbbadd.opengl.multitest.cube3d.Cube3DActivity;
 import pbbadd.opengl.multitest.egl.ActivityEGL;
+import pbbadd.opengl.multitest.fbomulti.ActivityFboMulti;
 import pbbadd.opengl.multitest.resizableview.ActivityResizeableView;
 import pbbadd.opengl.multitest.surfaceegl.ActivitySurfaceEgl;
 import pbbadd.opengl.multitest.surfacenocache.ActivitySurfaceNoCache;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button jump_to_wallpaper;
     private Button jump_to_resizeable_view;
+    private Button jump_to_fbomulti_view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_surface_view_choreographer();
         init_jump_to_wallpaper();
         init_jump_to_resizeable_view();
+        init_jump_to_fbomulti_view();
     }
 
     private void init_jump_to_textureview() {
@@ -140,6 +143,15 @@ public class MainActivity extends AppCompatActivity {
         jump_to_resizeable_view=findViewById(R.id.button_jump_to_resizeable_view);
         jump_to_resizeable_view.setOnClickListener(v->{
             Intent intent=new Intent(MainActivity.this, ActivityResizeableView.class);
+            Log.d(log_tag,"jump to resizeable view");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_fbomulti_view() {
+        jump_to_fbomulti_view=findViewById(R.id.button_jump_to_fbomulti_view);
+        jump_to_fbomulti_view.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivityFboMulti.class);
             Log.d(log_tag,"jump to resizeable view");
             startActivity(intent);
         });

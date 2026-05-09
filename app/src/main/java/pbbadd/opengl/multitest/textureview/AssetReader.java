@@ -20,11 +20,10 @@ public class AssetReader {
     public String readTextFromAssets(String assetPath) {
         StringBuilder content = new StringBuilder();
         AssetManager assetManager = mContext.getAssets();
-        try (
-                InputStream is = assetManager.open(assetPath);
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr)
-        ) {
+        try {
+            InputStream is = assetManager.open(assetPath);
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
             String line;
             while ((line = br.readLine()) != null) {
                 content.append(line).append("\n");

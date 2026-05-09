@@ -35,7 +35,7 @@ static const char* common_fragment_shader = R"(
     varying vec2 vTexCoord;
     uniform sampler2D uTexture;
     void main() {
-        gl_FragColor = texture2D(uTexture, vTexCoord);  // ✅ 修复！
+        gl_FragColor = texture2D(uTexture, vTexCoord);
     }
 )";
 
@@ -140,6 +140,7 @@ static void offscreen_render() {
 
 static void offscreen_2_screen() {
 //    offscreen_clear();
+//    eglMakeCurrent(common_egl_display, common_egl_surface, common_egl_surface, common_egl_context);
     eglSwapBuffers(common_egl_display, common_egl_surface);
 }
 

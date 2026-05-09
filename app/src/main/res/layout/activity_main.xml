@@ -67,7 +67,13 @@
             android:layout_height="wrap_content"/>
         <Button
             android:id="@+id/button_jump_to_resizeable_view"
-            android:text="resizeable view"
+            android:text="resizeable"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/button_jump_to_fbomulti_view"
+            android:text="fbo multi"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

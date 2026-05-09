@@ -7,7 +7,8 @@ add_library(
         test_glTexImage2D_onscreen.cpp
         egl_create_wait_destroy_fence_sync.cpp
         resizable_view.cpp
-        manual_egl.cpp)
+        manual_egl.cpp
+        fbo_multi.cpp)
 
 find_library(EGL-lib EGL)
 
