@@ -204,24 +204,44 @@ static void fbo_tex_draw_sub_(GLuint fbo,GLuint tex_draw) {
 }
 
 static void fbo_tex_draw() {
-//    common_clear();
     fbo_tex_draw_sub_(fbo_red,tex_red);
-//    common_clear();
     fbo_tex_draw_sub_(fbo_green,tex_green);
-//    common_clear();
     fbo_tex_draw_sub_(fbo_actual,tex_actual);
 }
 
 static void offscreen_draw() {
     fbo_tex_draw();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//    glBindTexture(GL_TEXTURE_2D, tex_actual);
-//    glBindTexture(GL_TEXTURE_2D, tex_green);
-//    glBindTexture(GL_TEXTURE_2D, tex_red);
     glBindTexture(GL_TEXTURE_2D, fbo_tex_actual);
     common_draw();
 }
 
+static void offscreen_draw_alternating() {
+    fbo_tex_draw();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, fbo_tex_actual);
+    common_draw();
+    eglSwapBuffers(common_egl_display, common_egl_surface);
+    glBindTexture(GL_TEXTURE_2D, fbo_tex_green);
+    common_draw();
+    eglSwapBuffers(common_egl_display, common_egl_surface);
+    glBindTexture(GL_TEXTURE_2D, fbo_tex_red);
+    common_draw();
+    eglSwapBuffers(common_egl_display, common_egl_surface);
+    glBindTexture(GL_TEXTURE_2D, fbo_tex_actual);
+    common_draw();
+    eglSwapBuffers(common_egl_display, common_egl_surface);
+}
+
+static void offscreen_draw_fbo() {
+    fbo_tex_draw();
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_red);
+    eglSwapBuffers(common_egl_display, common_egl_surface);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_green);
+    eglSwapBuffers(common_egl_display, common_egl_surface);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_actual);
+    eglSwapBuffers(common_egl_display, common_egl_surface);
+}
 
 static bool offscreen_render_check(int w,int h) {
     bool res=true;
@@ -355,5 +375,7 @@ Java_pbbadd_opengl_multitest_fbomulti_FboMultiView_render(JNIEnv *env, jobject t
 {
     if(offscreen_render_check(w,h)) {
         offscreen_2_screen();
+//        offscreen_draw_alternating();
+//        offscreen_draw_fbo();
     }
 }
