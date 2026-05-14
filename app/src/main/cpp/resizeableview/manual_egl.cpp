@@ -3,7 +3,7 @@
 #include <GLES2/gl2.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
-#include "common_include_and_log.h"
+#include "../common_include_and_log.h"
 
 __thread static GLuint origin_fbo_id;
 __thread static GLuint origin_tex_id;
@@ -253,7 +253,7 @@ static void common_update_tex_image_2d(GLbyte *pixels, int w, int h) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglinit(JNIEnv *env, jobject thiz, jobject jsurface)
+Java_pbbadd_opengl_multitest_resizeableview_ManualEGLView_eglinit(JNIEnv *env, jobject thiz, jobject jsurface)
 {
     window = ANativeWindow_fromSurface(env, jsurface);
     common_egl_init();
@@ -261,13 +261,13 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglinit(JNIEnv *env, jo
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_egldeinit(JNIEnv *env, jobject thiz)
+Java_pbbadd_opengl_multitest_resizeableview_ManualEGLView_egldeinit(JNIEnv *env, jobject thiz)
 {
     common_egl_deinit();
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_updateTexture(JNIEnv *env, jobject thiz, jbyteArray pixels, jint w, jint h)
+Java_pbbadd_opengl_multitest_resizeableview_ManualEGLView_updateTexture(JNIEnv *env, jobject thiz, jbyteArray pixels, jint w, jint h)
 {
     int size=w*h*4;
     auto *update_pixels=new uint8_t[size];
@@ -278,7 +278,7 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_updateTexture(JNIEnv *e
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_render(JNIEnv *env, jobject thiz,jint w,jint h)
+Java_pbbadd_opengl_multitest_resizeableview_ManualEGLView_render(JNIEnv *env, jobject thiz,jint w,jint h)
 {
     if(offscreen_render_check(w,h)) {
         offscreen_render_and_to_screen();
@@ -286,7 +286,7 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_render(JNIEnv *env, job
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_resize(
+Java_pbbadd_opengl_multitest_resizeableview_ManualEGLView_resize(
         JNIEnv *env, jobject thiz, jobject jsurface)
 {
     if(window!= nullptr) {
@@ -333,7 +333,7 @@ static EGLSurface mme_eglSurface = EGL_NO_SURFACE;
 static EGLConfig  mme_eglConfig;
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglinitanother(
+Java_pbbadd_opengl_multitest_resizeableview_ManualEGLView_eglinitanother(
         JNIEnv *env, jobject thiz, jobject jsurface)
 {
     ANativeWindow *window = ANativeWindow_fromSurface(env, jsurface);
@@ -371,7 +371,7 @@ Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_eglinitanother(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ManualEGLView_makeanothercontext(
+Java_pbbadd_opengl_multitest_resizeableview_ManualEGLView_makeanothercontext(
         JNIEnv *env, jobject thiz) {
     eglMakeCurrent(mme_eglDisplay, mme_eglSurface, mme_eglSurface, mme_eglContext);
 }

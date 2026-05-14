@@ -6,9 +6,9 @@ add_library(
         SHARED
         test_glTexImage2D_onscreen.cpp
         egl_create_wait_destroy_fence_sync.cpp
-        resizable_view.cpp
-        manual_egl.cpp
-        fbo_multi.cpp)
+        resizeableview/resizable_view.cpp
+        resizeableview/manual_egl.cpp
+        fbomulti/fbo_multi.cpp)
 
 find_library(EGL-lib EGL)
 

@@ -1,4 +1,4 @@
-package pbbadd.opengl.multitest.resizableview;
+package pbbadd.opengl.multitest.resizeableview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,9 +9,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL10;
 
 import pbbadd.opengl.multitest.R;

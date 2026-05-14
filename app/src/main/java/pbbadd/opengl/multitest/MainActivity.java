@@ -14,7 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 import pbbadd.opengl.multitest.cube3d.Cube3DActivity;
 import pbbadd.opengl.multitest.egl.ActivityEGL;
 import pbbadd.opengl.multitest.fbomulti.ActivityFboMulti;
-import pbbadd.opengl.multitest.resizableview.ActivityResizeableView;
+import pbbadd.opengl.multitest.resizeableview.ActivityResizeableView;
 import pbbadd.opengl.multitest.surfaceegl.ActivitySurfaceEgl;
 import pbbadd.opengl.multitest.surfacenocache.ActivitySurfaceNoCache;
 import pbbadd.opengl.multitest.surfaceusecache.ActivitySurfaceUseCache;

@@ -127,7 +127,8 @@ public class CubeRenderer implements GLSurfaceView.Renderer {
 
         // 初始化矩阵
         Matrix.setIdentityM(modelMatrix, 0);
-        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 4.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+//        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 4.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 5.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 
     @Override
@@ -149,7 +150,9 @@ public class CubeRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // 创建旋转矩阵
-        angle = (angle + 0.5f) % 360.0f;  // 每帧旋转0.5度
+//        angle = (angle + 0.1f) % 360.0f;  // 每帧旋转0.5度
+        angle=10;
+        Matrix.setIdentityM(modelMatrix, 0); //重置矩阵，防止重影；
         Matrix.setRotateM(rotationMatrix, 0, angle, 1.0f, 1.0f, 1.0f);
         Matrix.multiplyMM(modelMatrix, 0, rotationMatrix, 0, modelMatrix, 0);
 

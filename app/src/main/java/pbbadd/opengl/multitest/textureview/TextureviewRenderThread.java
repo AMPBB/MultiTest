@@ -448,8 +448,8 @@ public class TextureviewRenderThread extends Thread {
             Log.e(tag,"asset reader error");
             return false;
         }
-        String vertexShader30 = asset_reader.readTextFromAssets("vertex_shader.txt");
-        String fragShader30 = asset_reader.readTextFromAssets("fragment_shader.txt");
+        String vertexShader30 = asset_reader.readTextFromAssets("vertex_shader.c");
+        String fragShader30 = asset_reader.readTextFromAssets("fragment_shader.c");
 
         int vertexShader = loadShader30(GLES30.GL_VERTEX_SHADER, vertexShader30);
         if (vertexShader == 0) {

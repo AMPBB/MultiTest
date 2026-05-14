@@ -16,7 +16,7 @@
             android:name=".fbomulti.ActivityFboMulti"
             android:exported="false" />
         <activity
-            android:name=".resizableview.ActivityResizeableView"
+            android:name=".resizeableview.ActivityResizeableView"
             android:exported="false" />
         <activity
             android:name=".wallpaper.ActivityWallpaper"

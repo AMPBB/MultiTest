@@ -5,7 +5,7 @@
 #include <GLES2/gl2.h>
 #include <cstring>
 #include <EGL/egl.h>
-#include "resizable_view_shader_utils.h"
+#include "../resizable_view_shader_utils.h"
 #include <android/native_window_jni.h>
 
 static EGLDisplay eglDisplay = EGL_NO_DISPLAY;
@@ -51,7 +51,7 @@ float vertices[] = {
 };
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ResizeableView_recreateSurface(
+Java_pbbadd_opengl_multitest_resizeableview_ResizeableView_recreateSurface(
         JNIEnv* env, jobject thiz, jobject surface)
 {
     ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
@@ -80,7 +80,7 @@ Java_pbbadd_opengl_multitest_resizableview_ResizeableView_recreateSurface(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ResizeableView_nativeOnSurfaceCreated(
+Java_pbbadd_opengl_multitest_resizeableview_ResizeableView_nativeOnSurfaceCreated(
         JNIEnv* env, jobject thiz, jint pw, jint ph)
 {
     // 获取 display
@@ -121,7 +121,7 @@ Java_pbbadd_opengl_multitest_resizableview_ResizeableView_nativeOnSurfaceCreated
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ResizeableView_nativeSetTextureData(JNIEnv* env, jobject thiz,jbyteArray pixels, jint width, jint height) {
+Java_pbbadd_opengl_multitest_resizeableview_ResizeableView_nativeSetTextureData(JNIEnv* env, jobject thiz,jbyteArray pixels, jint width, jint height) {
     // 保存图片数据
     imageWidth = width;
     imageHeight = height;
@@ -139,7 +139,7 @@ Java_pbbadd_opengl_multitest_resizableview_ResizeableView_nativeSetTextureData(J
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ResizeableView_glteximage2d(JNIEnv* env, jobject thiz,jbyteArray pixels, jint width, jint height) {
+Java_pbbadd_opengl_multitest_resizeableview_ResizeableView_glteximage2d(JNIEnv* env, jobject thiz,jbyteArray pixels, jint width, jint height) {
     // 保存图片数据
     imageWidth = width;
     imageHeight = height;
@@ -157,12 +157,12 @@ Java_pbbadd_opengl_multitest_resizableview_ResizeableView_glteximage2d(JNIEnv* e
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ResizeableView_nativeOnSurfaceChanged(JNIEnv* env, jobject thiz, jint width, jint height) {
+Java_pbbadd_opengl_multitest_resizeableview_ResizeableView_nativeOnSurfaceChanged(JNIEnv* env, jobject thiz, jint width, jint height) {
     glViewport(0, 0, width, height);
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ResizeableView_nativeOnSurfaceChangedAndUpdate(JNIEnv* env, jobject thiz, jint vw, jint vh,jbyteArray pixels,jint pw,jint ph) {
+Java_pbbadd_opengl_multitest_resizeableview_ResizeableView_nativeOnSurfaceChangedAndUpdate(JNIEnv* env, jobject thiz, jint vw, jint vh,jbyteArray pixels,jint pw,jint ph) {
     glViewport(0, 0, vw, vh);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glTexSubImage2D(GL_TEXTURE_2D, 0,
@@ -173,7 +173,7 @@ Java_pbbadd_opengl_multitest_resizableview_ResizeableView_nativeOnSurfaceChanged
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ResizeableView_nativeOnDrawFrame(JNIEnv* env, jobject thiz) {
+Java_pbbadd_opengl_multitest_resizeableview_ResizeableView_nativeOnDrawFrame(JNIEnv* env, jobject thiz) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -191,6 +191,6 @@ Java_pbbadd_opengl_multitest_resizableview_ResizeableView_nativeOnDrawFrame(JNIE
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_pbbadd_opengl_multitest_resizableview_ResizeableView_onDrawOnlyTriangle(JNIEnv* env, jobject thiz) {
+Java_pbbadd_opengl_multitest_resizeableview_ResizeableView_onDrawOnlyTriangle(JNIEnv* env, jobject thiz) {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

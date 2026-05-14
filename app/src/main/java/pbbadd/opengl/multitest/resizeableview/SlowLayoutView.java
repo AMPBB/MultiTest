@@ -1,4 +1,4 @@
-package pbbadd.opengl.multitest.resizableview;
+package pbbadd.opengl.multitest.resizeableview;
 
 import android.content.Context;
 import android.util.AttributeSet;

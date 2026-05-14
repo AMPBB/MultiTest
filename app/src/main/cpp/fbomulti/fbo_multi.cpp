@@ -3,7 +3,7 @@
 #include <GLES2/gl2.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
-#include "common_include_and_log.h"
+#include "../common_include_and_log.h"
 
 __thread static GLuint tex_actual;
 __thread static GLuint tex_red;
@@ -46,14 +46,14 @@ static const char* common_fragment_shader = R"(
     }
 )";
 
-static float me_vertices_pos[] = {
+static float common_vertices_pos[] = {
         -1.0f,  1.0f,
         1.0f,  1.0f,
         -1.0f, -1.0f,
         1.0f, -1.0f,
 };
 
-static float me_vertices_uv[] = {
+static float common_vertices_uv[] = {
         0.0f, 0.0f,
         1.0f, 0.0f,
         0.0f, 1.0f,
@@ -189,10 +189,10 @@ static void offscreen_clear(int w,int h) {
 static void common_draw() {
     glUseProgram(common_program);
     GLint posLoc = glGetAttribLocation(common_program, "aPos");
-    glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_pos);
+    glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), common_vertices_pos);
     glEnableVertexAttribArray(posLoc);
     GLint texLoc = glGetAttribLocation(common_program, "aTexCoord");
-    glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), me_vertices_uv);
+    glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), common_vertices_uv);
     glEnableVertexAttribArray(texLoc);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }

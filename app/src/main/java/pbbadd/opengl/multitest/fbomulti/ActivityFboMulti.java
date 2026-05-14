@@ -1,12 +1,7 @@
 package pbbadd.opengl.multitest.fbomulti;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,8 +10,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import pbbadd.opengl.multitest.R;
-import pbbadd.opengl.multitest.resizableview.ManualEGLView;
-import pbbadd.opengl.multitest.resizableview.ResizeableView;
 
 public class ActivityFboMulti extends AppCompatActivity {
 
