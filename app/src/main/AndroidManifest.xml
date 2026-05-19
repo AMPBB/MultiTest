@@ -13,6 +13,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MultiTest">
         <activity
+            android:name=".cube3dmultifbo.ActivityCube3DMultiFbo"
+            android:exported="false" />
+        <activity
+            android:name=".fbomultijava.ActivityFboMultiJava"
+            android:exported="false" />
+        <activity
             android:name=".fbomulti.ActivityFboMulti"
             android:exported="false" />
         <activity

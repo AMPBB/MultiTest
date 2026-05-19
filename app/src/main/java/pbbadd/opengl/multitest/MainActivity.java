@@ -12,8 +12,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import pbbadd.opengl.multitest.cube3d.Cube3DActivity;
+import pbbadd.opengl.multitest.cube3dmultifbo.ActivityCube3DMultiFbo;
 import pbbadd.opengl.multitest.egl.ActivityEGL;
 import pbbadd.opengl.multitest.fbomulti.ActivityFboMulti;
+import pbbadd.opengl.multitest.fbomultijava.ActivityFboMultiJava;
 import pbbadd.opengl.multitest.resizeableview.ActivityResizeableView;
 import pbbadd.opengl.multitest.surfaceegl.ActivitySurfaceEgl;
 import pbbadd.opengl.multitest.surfacenocache.ActivitySurfaceNoCache;
@@ -38,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private Button jump_to_wallpaper;
     private Button jump_to_resizeable_view;
     private Button jump_to_fbomulti_view;
+    private Button jump_to_fbomulti_view_java;
+    private Button jump_to_cube3d_multi_fbo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,80 +69,35 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_wallpaper();
         init_jump_to_resizeable_view();
         init_jump_to_fbomulti_view();
+        init_jump_to_fbomulti_view_java();
+        init_jump_to_cube3d_multi_fbo();
     }
 
-    private void init_jump_to_textureview() {
-        jump_to_textureview=findViewById(R.id.button_jump_to_textureview);
-        jump_to_textureview.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, ActivityTextureview.class);
-            Log.i(log_tag,"jump to textureview activity");
+    private void init_jump_to_cube3d_multi_fbo() {
+        jump_to_cube3d_multi_fbo=findViewById(R.id.button_jump_to_cube3d_multi_fbo);
+        jump_to_cube3d_multi_fbo.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivityCube3DMultiFbo.class);
+            Log.d(log_tag,"jump to cube3d multi fbo");
             startActivity(intent);
         });
     }
 
-    private void init_jump_to_egl() {
-        jump_to_egl=findViewById(R.id.button_jump_to_egl);
-        jump_to_egl.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, ActivityEGL.class);
-            Log.d(log_tag,"jump to activity egl");
+    private void init_jump_to_fbomulti_view_java() {
+        jump_to_fbomulti_view_java=findViewById(R.id.button_jump_to_fbomulti_view_java);
+        jump_to_fbomulti_view_java.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivityFboMultiJava.class);
+            Log.d(log_tag,"jump to resizeable view java");
             startActivity(intent);
         });
     }
-
-    private void init_jump_to_cube3d() {
-        jump_to_cube3d=findViewById(R.id.button_jump_to_cube3d);
-        jump_to_cube3d.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, Cube3DActivity.class);
-            Log.d(log_tag,"jump to activity cube3d");
+    private void init_jump_to_fbomulti_view() {
+        jump_to_fbomulti_view=findViewById(R.id.button_jump_to_fbomulti_view);
+        jump_to_fbomulti_view.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivityFboMulti.class);
+            Log.d(log_tag,"jump to resizeable view");
             startActivity(intent);
         });
     }
-
-    private void init_jump_to_surface_no_cache() {
-        jump_to_surface_no_cache =findViewById(R.id.button_jump_to_surface_no_cache);
-        jump_to_surface_no_cache.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, ActivitySurfaceNoCache.class);
-            Log.d(log_tag,"jump to activity surface no cache");
-            startActivity(intent);
-        });
-    }
-
-    private void init_jump_to_surface_use_cache() {
-        jump_to_surface_use_cache =findViewById(R.id.button_jump_to_surface_use_cache);
-        jump_to_surface_use_cache.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, ActivitySurfaceUseCache.class);
-            Log.d(log_tag,"jump to activity surface use cache");
-            startActivity(intent);
-        });
-    }
-
-    private void init_jump_to_surface_egl() {
-        jump_to_surface_egl =findViewById(R.id.button_jump_to_surface_egl);
-        jump_to_surface_egl.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, ActivitySurfaceEgl.class);
-            Log.d(log_tag,"jump to activity surface egl");
-            startActivity(intent);
-        });
-    }
-
-    private void init_jump_to_surface_view_choreographer() {
-        jump_to_surface_choreographer =findViewById(R.id.button_jump_to_surface_choreographer);
-        jump_to_surface_choreographer.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, ActivitySurfaceViewChoreographer.class);
-            Log.d(log_tag,"jump to activity surface view choreographer");
-            startActivity(intent);
-        });
-    }
-
-    private void init_jump_to_wallpaper() {
-        jump_to_wallpaper=findViewById(R.id.button_jump_to_wallpaper);
-        jump_to_wallpaper.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, ActivityWallpaper.class);
-            Log.d(log_tag,"jump to activity wallpaper");
-            startActivity(intent);
-        });
-    }
-
     private void init_jump_to_resizeable_view() {
         jump_to_resizeable_view=findViewById(R.id.button_jump_to_resizeable_view);
         jump_to_resizeable_view.setOnClickListener(v->{
@@ -147,12 +106,67 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
-
-    private void init_jump_to_fbomulti_view() {
-        jump_to_fbomulti_view=findViewById(R.id.button_jump_to_fbomulti_view);
-        jump_to_fbomulti_view.setOnClickListener(v->{
-            Intent intent=new Intent(MainActivity.this, ActivityFboMulti.class);
-            Log.d(log_tag,"jump to resizeable view");
+    private void init_jump_to_wallpaper() {
+        jump_to_wallpaper=findViewById(R.id.button_jump_to_wallpaper);
+        jump_to_wallpaper.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivityWallpaper.class);
+            Log.d(log_tag,"jump to activity wallpaper");
+            startActivity(intent);
+        });
+    }
+    private void init_jump_to_surface_view_choreographer() {
+        jump_to_surface_choreographer =findViewById(R.id.button_jump_to_surface_choreographer);
+        jump_to_surface_choreographer.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivitySurfaceViewChoreographer.class);
+            Log.d(log_tag,"jump to activity surface view choreographer");
+            startActivity(intent);
+        });
+    }
+    private void init_jump_to_surface_egl() {
+        jump_to_surface_egl =findViewById(R.id.button_jump_to_surface_egl);
+        jump_to_surface_egl.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivitySurfaceEgl.class);
+            Log.d(log_tag,"jump to activity surface egl");
+            startActivity(intent);
+        });
+    }
+    private void init_jump_to_surface_use_cache() {
+        jump_to_surface_use_cache =findViewById(R.id.button_jump_to_surface_use_cache);
+        jump_to_surface_use_cache.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivitySurfaceUseCache.class);
+            Log.d(log_tag,"jump to activity surface use cache");
+            startActivity(intent);
+        });
+    }
+    private void init_jump_to_surface_no_cache() {
+        jump_to_surface_no_cache =findViewById(R.id.button_jump_to_surface_no_cache);
+        jump_to_surface_no_cache.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivitySurfaceNoCache.class);
+            Log.d(log_tag,"jump to activity surface no cache");
+            startActivity(intent);
+        });
+    }
+    private void init_jump_to_cube3d() {
+        jump_to_cube3d=findViewById(R.id.button_jump_to_cube3d);
+        jump_to_cube3d.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, Cube3DActivity.class);
+            Log.d(log_tag,"jump to activity cube3d");
+            startActivity(intent);
+        });
+    }
+    private void init_jump_to_egl() {
+        jump_to_egl=findViewById(R.id.button_jump_to_egl);
+        jump_to_egl.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivityEGL.class);
+            Log.d(log_tag,"jump to activity egl");
+            startActivity(intent);
+        });
+    }
+    private void init_jump_to_textureview() {
+        jump_to_textureview=findViewById(R.id.button_jump_to_textureview);
+        jump_to_textureview.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, ActivityTextureview.class);
+            Log.i(log_tag,"jump to textureview activity");
             startActivity(intent);
         });
     }

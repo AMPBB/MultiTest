@@ -8,7 +8,8 @@ add_library(
         egl_create_wait_destroy_fence_sync.cpp
         resizeableview/resizable_view.cpp
         resizeableview/manual_egl.cpp
-        fbomulti/fbo_multi.cpp)
+        fbomulti/fbo_multi.cpp
+        cube3dmultifbo/cube3d_multi_fbo.cpp)
 
 find_library(EGL-lib EGL)
 

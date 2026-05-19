@@ -10,18 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 import android.util.Log;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 public class CubeRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "CubeRenderer";
@@ -128,7 +117,7 @@ public class CubeRenderer implements GLSurfaceView.Renderer {
         // 初始化矩阵
         Matrix.setIdentityM(modelMatrix, 0);
 //        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 4.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 5.0f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 2.5f, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 
     @Override
@@ -150,8 +139,8 @@ public class CubeRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         // 创建旋转矩阵
-//        angle = (angle + 0.1f) % 360.0f;  // 每帧旋转0.5度
-        angle=10;
+        angle = (angle + 0.5f) % 360.0f;  // 每帧旋转0.5度
+//        angle=10;
         Matrix.setIdentityM(modelMatrix, 0); //重置矩阵，防止重影；
         Matrix.setRotateM(rotationMatrix, 0, angle, 1.0f, 1.0f, 1.0f);
         Matrix.multiplyMM(modelMatrix, 0, rotationMatrix, 0, modelMatrix, 0);
@@ -190,21 +179,21 @@ public class CubeRenderer implements GLSurfaceView.Renderer {
         // 顶点着色器
         String vertexShaderCode =
                 "attribute vec3 vPosition;" +
-                        "attribute vec4 aColor;" +
-                        "uniform mat4 uMVPMatrix;" +
-                        "varying vec4 vColor;" +
-                        "void main() {" +
-                        "  gl_Position = uMVPMatrix * vec4(vPosition, 1.0);" +
-                        "  vColor = aColor;" +
-                        "}";
+                "attribute vec4 aColor;" +
+                "uniform mat4 uMVPMatrix;" +
+                "varying vec4 vColor;" +
+                "void main() {" +
+                "  gl_Position = uMVPMatrix * vec4(vPosition, 1.0);" +
+                "  vColor = aColor;" +
+                "}";
 
         // 片段着色器
         String fragmentShaderCode =
                 "precision mediump float;" +
-                        "varying vec4 vColor;" +
-                        "void main() {" +
-                        "  gl_FragColor = vColor;" +
-                        "}";
+                "varying vec4 vColor;" +
+                "void main() {" +
+                "  gl_FragColor = vColor;" +
+                "}";
 
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
