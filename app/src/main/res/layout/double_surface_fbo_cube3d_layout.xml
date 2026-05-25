@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".doublesurfacefbocube3d.DoubleSurfaceFboCube3DActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/double_surface_cube3d_label_a"
+            android:text="View A (red clear→cube_a1 in FBO a1, green clear→cube_a2 in FBO a2, blit a1→screen)"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="#33000000"
+            android:textColor="#FFFFFF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <pbbadd.opengl.multitest.doublesurfacefbocube3d.DoubleSurfaceFboCube3DView
+            android:id="@+id/double_surface_cube3d_view_a"
+            android:layout_width="960px"
+            android:layout_height="540px"/>
+
+        <View
+            android:id="@+id/double_surface_cube3d_divider"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#FF0000FF" />
+
+        <TextView
+            android:id="@+id/double_surface_cube3d_label_b"
+            android:text="View B (yellow clear→cube_b1 in FBO b1, blit b1→screen)"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:background="#33000000"
+            android:textColor="#FFFFFF"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <pbbadd.opengl.multitest.doublesurfacefbocube3d.DoubleSurfaceFboCube3DView
+            android:id="@+id/double_surface_cube3d_view_b"
+            android:layout_width="960px"
+            android:layout_height="540px"/>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

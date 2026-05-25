@@ -13,6 +13,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MultiTest">
         <activity
+            android:name=".doublesurfacefbocube3d.DoubleSurfaceFboCube3DActivity"
+            android:exported="false" />
+        <activity
+            android:name=".doublesurfacefbo.DoubleSurfaceFboActivity"
+            android:exported="false" />
+        <activity
             android:name=".cube3dmultifbo.ActivityCube3DMultiFbo"
             android:exported="false" />
         <activity

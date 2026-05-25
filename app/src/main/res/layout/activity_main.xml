@@ -84,8 +84,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button
+            android:id="@+id/button_jump_to_double_surface_fbo"
+            android:text="double surface fbo"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
             android:id="@+id/button_jump_to_cube3d_multi_fbo"
             android:text="cube3d multi fbo"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/button_jump_to_double_surface_fbo_cube3d"
+            android:text="double surface fbo cube3d"
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>

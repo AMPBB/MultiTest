@@ -13,6 +13,8 @@ import androidx.core.view.WindowInsetsCompat;
 
 import pbbadd.opengl.multitest.cube3d.Cube3DActivity;
 import pbbadd.opengl.multitest.cube3dmultifbo.ActivityCube3DMultiFbo;
+import pbbadd.opengl.multitest.doublesurfacefbo.DoubleSurfaceFboActivity;
+import pbbadd.opengl.multitest.doublesurfacefbocube3d.DoubleSurfaceFboCube3DActivity;
 import pbbadd.opengl.multitest.egl.ActivityEGL;
 import pbbadd.opengl.multitest.fbomulti.ActivityFboMulti;
 import pbbadd.opengl.multitest.fbomultijava.ActivityFboMultiJava;
@@ -41,7 +43,9 @@ public class MainActivity extends AppCompatActivity {
     private Button jump_to_resizeable_view;
     private Button jump_to_fbomulti_view;
     private Button jump_to_fbomulti_view_java;
+    private Button jump_to_double_surface_fbo;
     private Button jump_to_cube3d_multi_fbo;
+    private Button jump_to_double_surface_fbo_cube3d;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +75,26 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_fbomulti_view();
         init_jump_to_fbomulti_view_java();
         init_jump_to_cube3d_multi_fbo();
+        init_jump_to_double_surface_fbo();
+        init_jump_to_double_surface_fbo_cube3d();
+    }
+
+    private void init_jump_to_double_surface_fbo() {
+        jump_to_double_surface_fbo=findViewById(R.id.button_jump_to_double_surface_fbo);
+        jump_to_double_surface_fbo.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, DoubleSurfaceFboActivity.class);
+            Log.d(log_tag,"jump to double surface fbo");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_double_surface_fbo_cube3d() {
+        jump_to_double_surface_fbo_cube3d=findViewById(R.id.button_jump_to_double_surface_fbo_cube3d);
+        jump_to_double_surface_fbo_cube3d.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, DoubleSurfaceFboCube3DActivity.class);
+            Log.d(log_tag,"jump to double surface fbo cube3d");
+            startActivity(intent);
+        });
     }
 
     private void init_jump_to_cube3d_multi_fbo() {
