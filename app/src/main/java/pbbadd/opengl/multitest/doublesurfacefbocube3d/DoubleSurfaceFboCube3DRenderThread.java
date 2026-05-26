@@ -252,8 +252,13 @@ public class DoubleSurfaceFboCube3DRenderThread extends Thread {
 
         while (!mIsThreadStop) {
             if (mIsRunning) {
-                renderViewA();
-                renderViewB();
+                // Phase 1: Render FBOs + blit to backbuffer (no swap)
+                renderToBackbufferA();
+                renderToBackbufferB();
+
+                // Phase 2: Swap buffers to present to screen
+                swapBuffersA();
+                swapBuffersB();
 
                 try {
                     Thread.sleep(RENDER_INTERVAL_MS);
@@ -268,8 +273,8 @@ public class DoubleSurfaceFboCube3DRenderThread extends Thread {
         Log.d(TAG, "render loop stopped");
     }
 
-    // ==================== View A render ====================
-    private void renderViewA() {
+    // ==================== Render to backbuffer (no swap) ====================
+    private void renderToBackbufferA() {
         EGL14.eglMakeCurrent(mEglDisplay, mEglSurfaceA, mEglSurfaceA, mEglContext);
 
         // --- FBO a1: red clear + cube_a1 ---
@@ -282,17 +287,14 @@ public class DoubleSurfaceFboCube3DRenderThread extends Thread {
         mCubeA2.computeMvp();
         renderCubeToFbo(mFboA2, mCubeA2, 0.1f, 0.8f, 0.1f); // green bg
 
-        // --- Blit a1 to default framebuffer (screen) ---
+        // --- Blit a1 to default framebuffer (backbuffer) ---
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glViewport(0, 0, mViewWidthA, mViewHeightA);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         drawScreenQuad(mFboTexA1);
-
-        EGL14.eglSwapBuffers(mEglDisplay, mEglSurfaceA);
     }
 
-    // ==================== View B render ====================
-    private void renderViewB() {
+    private void renderToBackbufferB() {
         EGL14.eglMakeCurrent(mEglDisplay, mEglSurfaceB, mEglSurfaceB, mEglContext);
 
         // --- FBO b1: yellow clear + cube_b1 ---
@@ -300,12 +302,21 @@ public class DoubleSurfaceFboCube3DRenderThread extends Thread {
         mCubeB1.computeMvp();
         renderCubeToFbo(mFboB1, mCubeB1, 0.9f, 0.9f, 0.1f); // yellow bg
 
-        // --- Blit b1 to default framebuffer (screen) ---
+        // --- Blit b1 to default framebuffer (backbuffer) ---
         GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
         GLES20.glViewport(0, 0, mViewWidthB, mViewHeightB);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         drawScreenQuad(mFboTexB1);
+    }
 
+    // ==================== Swap buffers (present to screen) ====================
+    private void swapBuffersA() {
+        EGL14.eglMakeCurrent(mEglDisplay, mEglSurfaceA, mEglSurfaceA, mEglContext);
+        EGL14.eglSwapBuffers(mEglDisplay, mEglSurfaceA);
+    }
+
+    private void swapBuffersB() {
+        EGL14.eglMakeCurrent(mEglDisplay, mEglSurfaceB, mEglSurfaceB, mEglContext);
         EGL14.eglSwapBuffers(mEglDisplay, mEglSurfaceB);
     }
 

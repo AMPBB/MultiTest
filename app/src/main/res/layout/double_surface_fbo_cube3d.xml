@@ -14,7 +14,7 @@
 
         <TextView
             android:id="@+id/double_surface_cube3d_label_a"
-            android:text="View A (red clear→cube_a1 in FBO a1, green clear→cube_a2 in FBO a2, blit a1→screen)"
+            android:text="view a"
             android:textSize="12sp"
             android:gravity="center"
             android:background="#33000000"
@@ -24,8 +24,8 @@
 
         <pbbadd.opengl.multitest.doublesurfacefbocube3d.DoubleSurfaceFboCube3DView
             android:id="@+id/double_surface_cube3d_view_a"
-            android:layout_width="960px"
-            android:layout_height="540px"/>
+            android:layout_width="500px"
+            android:layout_height="500px"/>
 
         <View
             android:id="@+id/double_surface_cube3d_divider"
@@ -35,7 +35,7 @@
 
         <TextView
             android:id="@+id/double_surface_cube3d_label_b"
-            android:text="View B (yellow clear→cube_b1 in FBO b1, blit b1→screen)"
+            android:text="view b"
             android:textSize="12sp"
             android:gravity="center"
             android:background="#33000000"
@@ -45,8 +45,8 @@
 
         <pbbadd.opengl.multitest.doublesurfacefbocube3d.DoubleSurfaceFboCube3DView
             android:id="@+id/double_surface_cube3d_view_b"
-            android:layout_width="960px"
-            android:layout_height="540px"/>
+            android:layout_width="500px"
+            android:layout_height="500px"/>
 
     </LinearLayout>
 

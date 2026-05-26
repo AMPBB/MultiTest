@@ -1,0 +1,8 @@
+当前的文件夹是基于androidstudio的demo项目，基于android14，有java也有native cpp；
+昨晚我在另一个对话中找你帮我写了doublesurfacefbocube3d的代码，现在需要帮忙再修改一下；
+先说下当前代码的大概功能：
+1.在pbbadd.opengl.multitest下有doublesurfacefbocube3d，目前的功能是使用fbo在2个view上更新，fbo中绘制的都是3d立方体，使用1个render thread通过切换上下文和交换来更新surface；
+2.当前代码中流程（我看到的流程，不一定准确）：切换到surface a context，绘制fbo a1，绘制fbo a2，fbo a1上屏显示；切换到surface b context，绘制fbo b1，fbo b1上屏显示；
+再说下详细的修改需求
+1.需要绘制cube3b到fbo和切换context并上屏分离开
+2.我期望的流程应该：切换到context a，绘制fbo a1，绘制fbo a2，blit fbo a1到backbuffer；切换到context b，绘制fbo b1，blit b1到backbuffer；切换到context a，swapbuffer更新surface，切换到context b，swapbuffer更新surface；
