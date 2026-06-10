@@ -22,13 +22,14 @@ public class SurfaceTextureListenerEnhanced implements TextureView.SurfaceTextur
     @Override
     public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture sf) {
         t_r_t.del_surface_info(sfi);
-        sf.release();
         return true;
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture sf, int w, int h) {
-        t_r_t.update_surface_info_size(sfi, w, h);
+        if (sfi != null) {
+            t_r_t.update_surface_info_size(sfi, w, h);
+        }
     }
 
     @Override

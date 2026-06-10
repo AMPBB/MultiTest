@@ -99,12 +99,14 @@ public class TextureviewRenderThread extends Thread {
         int pres_size=-1;
         int sleep_interval=100;
         synchronized (synchronized_flag) {
-            while(surface_info_list.isEmpty()) {
+            while(is_running && surface_info_list.isEmpty()) {
                 try {
                     synchronized_flag.wait();
                     last_size=surface_info_list.size();
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    Log.w(tag, "render thread wait interrupted");
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
         }
@@ -228,18 +230,27 @@ public class TextureviewRenderThread extends Thread {
     }
 
     private void egl_destroy() {
+        if (egl_display == null || egl_display == EGL14.EGL_NO_DISPLAY) {
+            return;
+        }
+
+        EGL14.eglMakeCurrent(egl_display, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT);
+        destroy_all_surfaces_locked();
         // 2. 销毁GLES3.0 Context
-        if (egl_context != null) {
+        if (egl_context != null && egl_context != EGL14.EGL_NO_CONTEXT) {
             EGL14.eglDestroyContext(egl_display, egl_context);
             Log.d(tag,"context released,"+index);
         }
 
         // 3. 终止EGL Display
-        if (egl_display != null) {
+        if (egl_display != null && egl_display != EGL14.EGL_NO_DISPLAY) {
             EGL14.eglTerminate(egl_display);
             Log.d(tag,"display terminated,"+index);
         }
 
+        egl_context = EGL14.EGL_NO_CONTEXT;
+        egl_display = EGL14.EGL_NO_DISPLAY;
+        egl_config = null;
         released_done = true;
     }
 
@@ -274,8 +285,8 @@ public class TextureviewRenderThread extends Thread {
 
     private void render_unprepare() {
         destroy_data();
-        egl_destroy();
         destroy_shader_program();
+        egl_destroy();
     }
 
     private Map<Integer,int[]> data_map;
@@ -340,6 +351,8 @@ public class TextureviewRenderThread extends Thread {
         GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE);
 
         Buffer data_to_buffer = IntBuffer.wrap(data);
+
+        Log.d(tag, "create texture, w:"+w+",h:"+h);
 
         // 上传纹理数据到GLES3.0
         GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA,
@@ -422,14 +435,39 @@ public class TextureviewRenderThread extends Thread {
     }
 
     public void del_surface_info(SurfaceInfo sfi) {
+        if (sfi == null) {
+            return;
+        }
         synchronized (synchronized_flag) {
             surface_info_list.remove(sfi);
+            destroy_surface(sfi);
         }
-        EGL14.eglDestroySurface(egl_display,sfi.eglSurface);
         Log.d(tag,"delete surface");
     }
 
+    private void destroy_all_surfaces_locked() {
+        synchronized (synchronized_flag) {
+            for (SurfaceInfo info : surface_info_list) {
+                destroy_surface(info);
+            }
+            surface_info_list.clear();
+        }
+    }
+
+    private void destroy_surface(SurfaceInfo info) {
+        if (info == null || info.eglSurface == null || info.eglSurface == EGL14.EGL_NO_SURFACE) {
+            return;
+        }
+        if (egl_display != null && egl_display != EGL14.EGL_NO_DISPLAY) {
+            EGL14.eglDestroySurface(egl_display, info.eglSurface);
+        }
+        info.eglSurface = EGL14.EGL_NO_SURFACE;
+    }
+
     public void update_surface_info_size(SurfaceInfo sfi, int w, int h) {
+        if (sfi == null) {
+            return;
+        }
         synchronized (synchronized_flag) {
             sfi.w = w;
             sfi.h = h;
@@ -441,11 +479,14 @@ public class TextureviewRenderThread extends Thread {
         synchronized (synchronized_flag) {
             is_running = false;
             is_egl_initialized = false;
+            synchronized_flag.notifyAll();
         }
+        interrupt();
         try {
             // 等待线程退出（最多1秒）
             join(1000);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             Log.e(tag, "stopRender() error" + e.getMessage());
         }
     }

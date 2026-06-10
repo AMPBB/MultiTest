@@ -1,7 +1,6 @@
 package pbbadd.opengl.multitest.textureview;
 
 import android.content.Context;
-import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -257,6 +256,9 @@ public class ActivityTextureview extends AppCompatActivity {
     }
 
     private void destroy_render_thread_list() {
+        if (render_thread_list == null) {
+            return;
+        }
         for(TextureviewRenderThread tv_rt: render_thread_list) {
             tv_rt.stopRender();
         }
@@ -303,14 +305,14 @@ public class ActivityTextureview extends AppCompatActivity {
     }
 
     private void destroy_texture_view_list() {
+        if (texture_view_list == null) {
+            return;
+        }
         for(TextureView tv:texture_view_list) {
-            SurfaceTexture st=tv.getSurfaceTexture();
-            if(st!=null) {
-                st.release();
-            }
             tv.setSurfaceTextureListener(null);
             textureview_container.removeView(tv);
         }
+        texture_view_list.clear();
     }
 
     private void create_list() {
@@ -319,8 +321,8 @@ public class ActivityTextureview extends AppCompatActivity {
     }
 
     private void destroy_list() {
-        destroy_texture_view_list();
         destroy_render_thread_list();
+        destroy_texture_view_list();
     }
 
 
