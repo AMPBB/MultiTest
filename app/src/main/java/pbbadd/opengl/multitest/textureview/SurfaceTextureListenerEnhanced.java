@@ -28,7 +28,7 @@ public class SurfaceTextureListenerEnhanced implements TextureView.SurfaceTextur
 
     @Override
     public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture sf, int w, int h) {
-
+        t_r_t.update_surface_info_size(sfi, w, h);
     }
 
     @Override

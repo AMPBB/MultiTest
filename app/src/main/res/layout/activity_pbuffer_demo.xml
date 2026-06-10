@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".pbuffer.ActivityPbufferDemo">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <ImageView
+                android:id="@+id/image_pbuffer_result"
+                android:layout_width="256dp"
+                android:layout_height="256dp"
+                android:background="#111111"
+                android:contentDescription="pbuffer render result"
+                android:scaleType="fitCenter" />
+
+            <Button
+                android:id="@+id/button_pbuffer_width_lt_height_lt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="width&lt;65536 height&lt;65536" />
+
+            <Button
+                android:id="@+id/button_pbuffer_width_lt_height_ge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="width&lt;65536 height&gt;=65536" />
+
+            <Button
+                android:id="@+id/button_pbuffer_width_ge_height_lt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="width&gt;=65536 height&lt;65536" />
+
+            <Button
+                android:id="@+id/button_pbuffer_width_ge_height_ge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="width&gt;=65536 height&gt;=65536" />
+
+            <TextView
+                android:id="@+id/text_pbuffer_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:textColor="#222222"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

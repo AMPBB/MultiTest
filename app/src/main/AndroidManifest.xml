@@ -16,6 +16,9 @@
             android:name=".doublesurfacefbocube3d.DoubleSurfaceFboCube3DActivity"
             android:exported="false" />
         <activity
+            android:name=".pbuffer.ActivityPbufferDemo"
+            android:exported="false" />
+        <activity
             android:name=".doublesurfacefbo.DoubleSurfaceFboActivity"
             android:exported="false" />
         <activity

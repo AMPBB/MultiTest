@@ -250,7 +250,6 @@ public class TextureviewRenderThread extends Thread {
         if(!create_shader_program()) {
             return false;
         }
-        GLES30.glViewport(0, 0, w, h);
         GLES30.glUseProgram(program_id);
         create_data(w,h);
 
@@ -261,9 +260,10 @@ public class TextureviewRenderThread extends Thread {
         return true;
     }
 
-    private void render_ing(int w,int h) {
+    private void render_ing(int surface_w,int surface_h) {
+        GLES30.glViewport(0, 0, surface_w, surface_h);
         int[] data_order=get_data_with_order_color();
-        int texture_id = create_texture(data_order, w, h);
+        int texture_id = create_texture(data_order, tv_w, tv_h);
         if (texture_id == 0) {
             Log.e(tag,"create texture id failed");
             return;
@@ -427,6 +427,13 @@ public class TextureviewRenderThread extends Thread {
         }
         EGL14.eglDestroySurface(egl_display,sfi.eglSurface);
         Log.d(tag,"delete surface");
+    }
+
+    public void update_surface_info_size(SurfaceInfo sfi, int w, int h) {
+        synchronized (synchronized_flag) {
+            sfi.w = w;
+            sfi.h = h;
+        }
     }
 
     public void stopRender() {

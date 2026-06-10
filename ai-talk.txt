@@ -1,0 +1,41 @@
+当前的文件夹是基于androidstudio的demo项目，基于android14，有java也有native cpp；
+昨晚我在另一个对话中找你帮我写了doublesurfacefbocube3d的代码，现在需要帮忙再修改一下；
+先说下当前代码的大概功能：
+1.在pbbadd.opengl.multitest下有doublesurfacefbocube3d，目前的功能是使用fbo在2个view上更新，fbo中绘制的都是3d立方体，使用1个render thread通过切换上下文和交换来更新surface；
+2.当前代码中流程（我看到的流程，不一定准确）：切换到surface a context，绘制fbo a1，绘制fbo a2，fbo a1上屏显示；切换到surface b context，绘制fbo b1，fbo b1上屏显示；
+再说下详细的修改需求
+1.需要绘制cube3b到fbo和切换context并上屏分离开
+2.我期望的流程应该：切换到context a，绘制fbo a1，绘制fbo a2，blit fbo a1到backbuffer；切换到context b，绘制fbo b1，blit b1到backbuffer；切换到context a，swapbuffer更新surface，切换到context b，swapbuffer更新surface；
+
+当前的文件夹是基于androidstudio的demo项目，基于android14，有java也有native
+请帮我写一个pbuffer测试项，基本需求如下：
+1.测试eglCreatePbufferSurface接口是否正常，传入不同类型的参数，有以下4种组合：
+	width< 65536 && heigth< 65536
+	width< 65536 && heigth>=65536
+	width>=65536 && height< 65536
+	width>=65536 && height>=65536
+2.在pbbadd.opengl.multitest下添加pbuffer包并添加PbufferActivity，和其它测试demo的代码类似，然后需要在MainActivity中添加一个可以跳转到PbufferActivity的按钮
+
+上述的4种尺寸并没有在代码种体现，帮忙再修改下，PbufferActivity中添加4个按钮，点击不同的按钮能够使用对应的尺寸作为参数传入eglCreatePbufferSurface
+	width< 65536 && heigth< 65536
+	width< 65536 && heigth>=65536
+	width>=65536 && height< 65536
+	width>=65536 && height>=65536
+
+
+cdevhang
+现在所在的目录是包含了很多模块编译ko的目录，真正的代码编译在docker环境下进行，当前命令行不在docker环境中
+请帮忙在cdevhang下编写一个字符设备驱动，需求如下：
+1.创建字符设备 chang
+2.驱动中请创建4个线程，每个线程绑定一个cpu运行，线程每500ms打印"chang work"字符串
+3.创建trigger_hang节点，当cat trigger_hang的时候，每个线程都变成占用cpu，要制造cpu hang住的场景，制造hwt
+
+现在所在的目录是包含了很多模块编译ko的目录，真正的代码编译在docker环境下进行，当前命令行不在docker环境中
+我现在新建了cdevhang目录，并新增了cdevhang.c文件，但是我不知道应该添加什么文件或者规则，才能生成cdevhang.ko，请你帮我补全；
+
+
+lilililili
+
+
+当前文件夹是GPU虚拟化的后端代码，主要功能是完成gfxstream的流程
+我现在碰到一个问题，
