@@ -48,3 +48,14 @@ lilililili
 
 请帮我看下pbbadd\opengl\multitest\textureview中的代码，我在textureview_w和textureview_h中设置的值，传到glTexImage2D中变成了view的宽高，而不是我设定的宽高，这个应该如何修改呢？
 这块代码有什么缺陷么，为什么start-->stop-->start看起来app所在进程的fd数量在不断增大？
+
+当前的代码目录是我写的demo(大部分是靠不同的AI写的)
+请帮我写一个demo，按照当前的结构和风格，MainActivity中点击按钮然后跳转到新的Activity中进行测试，最好用java来写代码；
+新增一个graphic buffer测试demo，新建GraphicBufferActivity和graphic_buffer_layout.xml；
+从MainActivity跳转进入GraphicBufferActivity之后可以设置width和height参数，有个start按钮，有个info文本框；
+填写width和height之后，点击start按钮，能够根据设置的width和height来创建graphicbuffer，如果创建成功则在info中显示create success，如果创建失败则在info中显示create failed
+
+再增加一个按钮destroy，点击之后销毁创建的graphicbuffer
+再增强鲁棒性，没有销毁创建的graphicbuffer之前再次点击start不会重复创建graphicbuffer；只有销毁之后点击start才会重新创建graphicbuffer
+
+非常感谢，新增的功能很好用

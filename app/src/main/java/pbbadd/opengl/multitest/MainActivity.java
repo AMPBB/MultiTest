@@ -18,6 +18,7 @@ import pbbadd.opengl.multitest.doublesurfacefbocube3d.DoubleSurfaceFboCube3DActi
 import pbbadd.opengl.multitest.egl.ActivityEGL;
 import pbbadd.opengl.multitest.fbomulti.ActivityFboMulti;
 import pbbadd.opengl.multitest.fbomultijava.ActivityFboMultiJava;
+import pbbadd.opengl.multitest.graphicbuffer.GraphicBufferActivity;
 import pbbadd.opengl.multitest.pbuffer.ActivityPbufferDemo;
 import pbbadd.opengl.multitest.resizeableview.ActivityResizeableView;
 import pbbadd.opengl.multitest.surfaceegl.ActivitySurfaceEgl;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private Button jump_to_cube3d_multi_fbo;
     private Button jump_to_double_surface_fbo_cube3d;
     private Button jump_to_pbuffer;
+    private Button jump_to_graphic_buffer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +82,16 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_double_surface_fbo();
         init_jump_to_double_surface_fbo_cube3d();
         init_jump_to_pbuffer();
+        init_jump_to_graphic_buffer();
+    }
+
+    private void init_jump_to_graphic_buffer() {
+        jump_to_graphic_buffer=findViewById(R.id.button_jump_to_graphic_buffer);
+        jump_to_graphic_buffer.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, GraphicBufferActivity.class);
+            Log.d(log_tag,"jump to graphic buffer");
+            startActivity(intent);
+        });
     }
 
     private void init_jump_to_pbuffer() {
