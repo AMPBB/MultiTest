@@ -19,6 +19,7 @@ import pbbadd.opengl.multitest.egl.ActivityEGL;
 import pbbadd.opengl.multitest.fbomulti.ActivityFboMulti;
 import pbbadd.opengl.multitest.fbomultijava.ActivityFboMultiJava;
 import pbbadd.opengl.multitest.graphicbuffer.GraphicBufferActivity;
+import pbbadd.opengl.multitest.hugeteximage2d.HugeTexActivity;
 import pbbadd.opengl.multitest.pbuffer.ActivityPbufferDemo;
 import pbbadd.opengl.multitest.resizeableview.ActivityResizeableView;
 import pbbadd.opengl.multitest.surfaceegl.ActivitySurfaceEgl;
@@ -31,6 +32,7 @@ import pbbadd.opengl.multitest.wallpaper.ActivityWallpaper;
 public class MainActivity extends AppCompatActivity {
     private static final String log_tag = "main";
     private Button jump_to_tex_image_2d;
+    private Button jump_to_huge_tex_image_2d;
 
     private Button jump_to_textureview;
     private Button jump_to_egl;
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, ActivityTexImage2D.class);
             startActivity(intent);
         });
+        init_jump_to_huge_tex_image_2d();
 
         init_jump_to_textureview();
         init_jump_to_egl();
@@ -83,6 +86,15 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_double_surface_fbo_cube3d();
         init_jump_to_pbuffer();
         init_jump_to_graphic_buffer();
+    }
+
+    private void init_jump_to_huge_tex_image_2d() {
+        jump_to_huge_tex_image_2d=findViewById(R.id.button_jump_to_huge_tex_image_2d);
+        jump_to_huge_tex_image_2d.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, HugeTexActivity.class);
+            Log.d(log_tag,"jump to huge teximage2d");
+            startActivity(intent);
+        });
     }
 
     private void init_jump_to_graphic_buffer() {

@@ -5,6 +5,7 @@ add_library(
         gles30testdemo
         SHARED
         test_glTexImage2D_onscreen.cpp
+        huge_tex_image2d.cpp
         egl_create_wait_destroy_fence_sync.cpp
         resizeableview/resizable_view.cpp
         resizeableview/manual_egl.cpp

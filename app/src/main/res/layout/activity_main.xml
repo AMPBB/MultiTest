@@ -21,6 +21,12 @@
                 android:layout_gravity="center"
                 android:text="@string/jump_to_tex_image_2d" />
             <Button
+                android:id="@+id/button_jump_to_huge_tex_image_2d"
+                android:text="huge teximage2d"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <Button
                 android:id="@+id/button_jump_to_textureview"
                 android:text="textureview"
                 android:layout_gravity="center"
