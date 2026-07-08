@@ -16,6 +16,11 @@
             android:name=".doublesurfacefbocube3d.DoubleSurfaceFboCube3DActivity"
             android:exported="false" />
         <activity
+            android:name=".gamesnacks.GameSnacksActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="false"
+            android:hardwareAccelerated="true" />
+        <activity
             android:name=".hugeteximage2d.HugeTexActivity"
             android:exported="false" />
         <activity

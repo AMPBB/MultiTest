@@ -70,3 +70,14 @@ lilililili
 
 我看到HugeTexView.java中，glTexImage2D 传递的是null，而 glTexSubImage2D 是通过offset来更新的；
 帮忙重新修改下，现在的需求是 glTexImage2D 和 glTexSubImage2D 每次都是通过传递一个完整的texture数据来更新的；
+
+当我使用8192*8192的大小时，texture的理论大小应该是256MB，为什么会报错allocate texture data failed:
+
+但是我现在需要测试的就是texture大小超过256MB的时候，opengl sdk能够正常工作；
+能否帮忙修改下代码，添加对应的native代码，将 glTexImage2D 和 glTexSubImage2D 放到native中，我之前使用cpp实现过类似的功能，是不会出现报错的；
+
+
+请帮我写个demo，按照当前的结构和风格，MainActivity中点击按钮然后跳转到新的Activity中进行测试，最好用java来写代码；
+我碰到一个gamesnacks在2560*720分辨率上显示出现花屏的问题，我将对应的html代码剥离出来并保存为单独的文件了，保存为app\src\main\assets\GameSnacks_Personalization_settings.html；
+我需要模拟一个gamesnacks的demo，跳转到这个Activity之后也像gamesnacks一样，以网页的形式显示GameSnacks_Personalization_settings.html，然后我在对应的设备上确认是否能够复现问题，然后通过调整html代码来确认是否是html代码的缺陷导致的问题；
+请帮我写个这样的demo，非常感谢！
