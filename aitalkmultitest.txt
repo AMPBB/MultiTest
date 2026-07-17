@@ -97,3 +97,17 @@ dpToPx 的作用是？
 我将 GPU_COMPOSITION_STRESS_LAYER_COUNT 设置为1，我发现 GameSnacksActivity 里面在绘制的时候仍然还是走gpu并调用gles api的，这是为什么？webview一定会调用gpu绘图么
 
 我更新了 app\src\main\assets\GameSnacks_Personalization_settings.html，将主界面的网页代码也一并复制了下来，但是点击gamesnacks之后显示的还是只有 personal settings 的界面，为什么？
+
+我使用浏览器打开html文件看到的是上面是主界面，下面是personal settings的界面；
+如果我想在进入 GameSnacksActivity 之后和正常的gamesnacks 一样，先显示主界面，然后点击personal settings 的按钮才显示新的界面应该怎么做？
+
+我解压了GameSnacks_1.40.827663177_APKPure.apk安装包，但是没有看到类似的网页文件，这是为什么？
+使用的是chromium不需要使用html文件么？
+
+我发先确实远程在服务端，我想用 webView.loadUrl("https://gamesnacks.com/") 的方式加载，请帮我修改
+
+非常感谢，和gamesnacks简直一模一样的
+
+请再帮我改一下，进入 GameSnacksActivity 之后 关闭通知栏和底部按钮，参考surfacenocache
+
+非常感谢
