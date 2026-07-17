@@ -81,3 +81,19 @@ lilililili
 我碰到一个gamesnacks在2560*720分辨率上显示出现花屏的问题，我将对应的html代码剥离出来并保存为单独的文件了，保存为app\src\main\assets\GameSnacks_Personalization_settings.html；
 我需要模拟一个gamesnacks的demo，跳转到这个Activity之后也像gamesnacks一样，以网页的形式显示GameSnacks_Personalization_settings.html，然后我在对应的设备上确认是否能够复现问题，然后通过调整html代码来确认是否是html代码的缺陷导致的问题；
 请帮我写个这样的demo，非常感谢！
+
+我更新了GameSnacks_Personalization_settings.html文件；并且我发现gamesnacks activity并没有走gpu合成，问题并不能在设备上复现，有什么办法可以让gamesnacks activity走gpu合成呢？
+
+
+请帮我写个简单的 demo，按照当前的结构和风格，MainActivity中点击按钮然后跳转到新的Activity中进行测试，最好用java来写代码；
+文字转光栅化得到 texture 之后，glVertexAttribPointer 和 glVertexAttribIPointer 的使用；
+
+能和我简单说下 text attrib pointer 代码中的流程么？
+
+floatVertices 和 intVertices 里面的数值都表示什么意思？
+
+帮我看下 GameSnacksActivity.java ，我想知道 initGpuCompositionStressLayers()是做什么的
+dpToPx 的作用是？
+我将 GPU_COMPOSITION_STRESS_LAYER_COUNT 设置为1，我发现 GameSnacksActivity 里面在绘制的时候仍然还是走gpu并调用gles api的，这是为什么？webview一定会调用gpu绘图么
+
+我更新了 app\src\main\assets\GameSnacks_Personalization_settings.html，将主界面的网页代码也一并复制了下来，但是点击gamesnacks之后显示的还是只有 personal settings 的界面，为什么？

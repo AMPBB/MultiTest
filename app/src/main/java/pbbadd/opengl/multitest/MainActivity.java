@@ -27,6 +27,7 @@ import pbbadd.opengl.multitest.surfaceegl.ActivitySurfaceEgl;
 import pbbadd.opengl.multitest.surfacenocache.ActivitySurfaceNoCache;
 import pbbadd.opengl.multitest.surfaceusecache.ActivitySurfaceUseCache;
 import pbbadd.opengl.multitest.surfaceviewchoregrapher.ActivitySurfaceViewChoreographer;
+import pbbadd.opengl.multitest.textattrib.TextAttribPointerActivity;
 import pbbadd.opengl.multitest.textureview.ActivityTextureview;
 import pbbadd.opengl.multitest.wallpaper.ActivityWallpaper;
 
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private Button jump_to_tex_image_2d;
     private Button jump_to_huge_tex_image_2d;
     private Button jump_to_gamesnacks;
+    private Button jump_to_text_attrib_pointer;
 
     private Button jump_to_textureview;
     private Button jump_to_egl;
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         });
         init_jump_to_huge_tex_image_2d();
         init_jump_to_gamesnacks();
+        init_jump_to_text_attrib_pointer();
 
         init_jump_to_textureview();
         init_jump_to_egl();
@@ -89,6 +92,15 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_double_surface_fbo_cube3d();
         init_jump_to_pbuffer();
         init_jump_to_graphic_buffer();
+    }
+
+    private void init_jump_to_text_attrib_pointer() {
+        jump_to_text_attrib_pointer=findViewById(R.id.button_jump_to_text_attrib_pointer);
+        jump_to_text_attrib_pointer.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, TextAttribPointerActivity.class);
+            Log.d(log_tag,"jump to text attrib pointer");
+            startActivity(intent);
+        });
     }
 
     private void init_jump_to_gamesnacks() {

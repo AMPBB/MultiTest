@@ -33,6 +33,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <Button
+                android:id="@+id/button_jump_to_text_attrib_pointer"
+                android:text="text attrib pointer"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <Button
                 android:id="@+id/button_jump_to_textureview"
                 android:text="textureview"
                 android:layout_gravity="center"
