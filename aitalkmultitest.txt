@@ -111,3 +111,13 @@ dpToPx 的作用是？
 请再帮我改一下，进入 GameSnacksActivity 之后 关闭通知栏和底部按钮，参考surfacenocache
 
 非常感谢
+
+请帮我改写下tex attrib，文字使用gpu光栅化方式并使用矩形装箱算法，将乱序的字符拼凑到一个texture中，然后使用glBufferData glBufferSubData glVertexAttribPointer但不限于这些api，来显示文字
+
+跟我大概讲解下流程
+
+将乱序文字的uv打印出来
+
+tex attrib的流程不符合我说的流程(和用webview显示的gamesnacks中的文字光栅化显示流程不一样)，预期hook住glTexImage2D和glTexSubImage2D然后保存参数中的pixels数据，得到的应该是GL_RED格式的使用矩形装箱算法得到的字符集纹理，但是我现在抓到的是GL_RGBA格式的排列乱序的字符串纹理而已；
+
+那你能跟我说下 Chromium 的 GPU font rasterizer 内部实现是怎么做的么？
