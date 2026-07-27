@@ -121,3 +121,107 @@ dpToPx 的作用是？
 tex attrib的流程不符合我说的流程(和用webview显示的gamesnacks中的文字光栅化显示流程不一样)，预期hook住glTexImage2D和glTexSubImage2D然后保存参数中的pixels数据，得到的应该是GL_RED格式的使用矩形装箱算法得到的字符集纹理，但是我现在抓到的是GL_RGBA格式的排列乱序的字符串纹理而已；
 
 那你能跟我说下 Chromium 的 GPU font rasterizer 内部实现是怎么做的么？
+
+你写的tex attrib我还不是很明白；文字光栅化之后的乱序是怎么做的？乱序之后的文字纹理是怎么对应文字的？纹理是怎么绘制的？
+
+我现在需要将app需求的sdk降低到25，即适配android 7.1.1，但是我直接修改minsdk 25之后build报错了，请帮我解决这个问题
+
+请帮我修改下配置，将 build 生成的 app-debug.apk 复制到D:\multitest.apk
+
+能否将GameSnacksActivity的帧率降低，我需要降低帧率进行帧数据抓取
+
+能否帮忙修改下webview的大小，现在应该是100%占满屏幕，请帮我修改下，width占90%，height占80%，并怎么修改请告诉我我可能会尝试很多种组合，就不麻烦你一一修改了
+
+这样手动修改还是太麻烦了，请帮我修改下MainActivity，在gamesnacks按钮旁边加两个edittextview，分别用来控制width和height占比，默认值为0.7,0.7
+
+请帮我新增一个测试项，BackgroundActivity，需要有在后台运行的功能，我想用这个测试项来拉高gl api调用的负载来测试某些问题
+开始运行之后，会不断的在后台调用glTexImage2D、glTexSubImage2D、glBufferData、glBufferSubData更新数据
+至于更新什么，可以自由发挥，texture尺寸、bufferdata数据大小在进入activity后指定
+有开始和停止按钮
+
+目前的负载还是不够重，我查看了gpu loading，最高只达到了18%，基本在2~5%左右，负载很轻；
+请帮我再修改下，我需要能够设置线程数，每个线程的texture size和buffer data size都使用相同的设置，每个线程都按照之前的逻辑来不断调用api
+
+负载还是比较轻，大概平均在16%左右；我在想可能是只传输了数据，没有进行实际的渲染和绘制，所以gpu的负载并不高；
+请帮忙修改下，数据传输完之后进行离屏的渲染和绘制，内容自由发挥；
+
+
+https://du2si.no-mad-sub.one/link/hOuv0Vr3IGrS484p?clash=3&extend=1
+
+请参考D:\AndroidCode\MultiTest中GameSnacksActivity，写一个独立的模仿gamesnacks的app，我需要debug一些问题，非常感谢；
+要求：去掉webview的width和height占比设置，打开app后直接载入gamesnacks网址即可
+
+请帮我修改下配置，最小支持android14，目标支持android15，将 build 生成的 app-debug.apk 复制到D:\gamesnacks.apk
+
+使用renderdoc hook，报错了，报错信息我存入appstarterror.txt中了
+仍然报错，我更新了appstarterror.txt，请帮忙看看现在的报错是因为什么？
+
+更合适的是用 Chrome DevTools/WebView debugging 看 WebGL，或者改成原生 GLES/Vulkan demo 再用 RenderDoc 抓帧
+Chrome DevTools/WebView debugging 这个如何使用？
+改成原生 GLES/Vulkan demo 怎么改，能帮我改么？
+
+
+不好意思，请帮我改回原来的webview方式，然后打开
+WebView.setWebContentsDebuggingEnabled(true);
+我要使用Spector.js调试
+
+请帮我把 spector.bundle.js内置到 APK 里做本地注入
+
+启动app之后chrome inspect发现console直接打印了错误
+Access to fetch at 'https://4erks8385j9eo.h5games.usercontent.goog/v/1ff4p4m8ilme8/images/mahjong-solitaire-horizontal-banner-2.png=w256?v=1' from origin 'https://gamesnacks.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
+The FetchEvent for "https://4erks8385j9eo.h5games.usercontent.goog/v/1ff4p4m8ilme8/images/mahjong-solitaire-horizontal-banner-2.png=w256?v=1" resulted in a network error response: an "opaque" response was used for a request whose type is not no-cors
+mahjong-solitaire-horizontal-banner-2.png=w256?v=1:1  Failed to load resource: net::ERR_FAILED
+
+
+struct font_s {
+float x;
+float y;
+u32 rgba;
+u16 u;
+u16 v;
+};
+font_s font_config[16] @ 0x00;
+
+我想研究 chromium 的 gpu font rasterizer 时候调用gles api的流程；请帮我写个gpu font rasterizer activity，使用webview，新建一个本地的html，放在asset中，命名为gpu_font_rasterizer.html，代码参考assets中的GameSnacks_Personalization_settings.html，文字内容就使用4个字符"a bc"，方便我跟踪；
+是新创建一个gpu font rasterizer activity，不要动当前的gamsnacks的代码
+
+chromium 的 gpu font rasterizer 会将abc按照矩形装箱算法变成texture，在调用glTexSubImage2D更新之前会通过glBufferSubData传递一些数据，这些数据中包含了如何字符在texture中对应的位置和绘制到屏幕上的位置，但是我不太清除这些数据的格式和数据的对应方法；向你请教一下
+
+glBufferSubData的数据格式和glVertexAttribPointer有什么关系？
+
+glVertexAttribPointer 的 pointer 应该如何读取，给个代码示例
+
+请帮我修改下gpu_font_rasterizer.html的文字内容修改下，如下：
+abc
+EFG
+hijk
+第一行字体大小16
+第二行字体大小32
+第三行字体大小64
+
+关于gamesnacks花屏的问题；我按照你给我做的gpu font rasterizer demo 和你给我讲解的流程已经明白了文字texture矩形装箱之后如何根据bufferdata中的坐标来绘制；
+我在可以复现的设别上抓取了日志和数据，日志和数据存放在D:\05-byd\65-b+f_gamesnack_glitch中，
+12-scrcpy-01-bad 是从点击personal settings按钮开始抓取的；12-scrcpy-02-ok是进入personal settings之后点击了下按钮开始抓的(恢复正常)
+12-public-abcefghijk 是你给我写的demo(真的非常感谢呀~)，从点击gpu font rasterizer按钮开始抓的；12-public-gamesnacks是在不花屏的设备上抓取的，从点击personal settings按钮开始抓取的；
+12-scrcpy-01-bad的 1369_target0x0de1_w512_h61_size0x1e800_format0x1903texsub 是花屏区域的文字texture，但是从日志上没有找到对应的glVertexAttribPointer传递的参数
+12-public-gamesnacks的334_target0x0de1_w512_h69_size0x22800_format0x1903texsub是对应花屏区域的文字texture(这个设备上没有花屏现象)，但是日志有明确对应的地方，335_float_size2_stride16_offset0 336_ubyte_size4_stride16_offset8 337_ushort_size2_stride16_offset12，我抓了很多次都是这样，我不太明白是我的理解有误还是app本身传的数据就有问题所以我找不到；
+我尝试查找 1369_target0x0de1_w512_h61_size0x1e800_format0x1903texsub 的坐标数据，1368_target0x8892_size0x61e0这个文件比较像，大概是从0x140~0x4e70按照 struct font_s {float x; float y; u32 rgba; u16 u; u16 v;} 这种结构能够解析出坐标来，
+花屏区域的文字为：
+We use cookies to deliver and maintain Google services, track outages and protect against spam, fraud and abuse, measure audience engagement and site statistics to understand how our services are used and enhance the quality of those services. We also use cookies to support personalisation settings that let you choose how to use Google, even when you’re signed out.
+GameSnacks personalisation
+Get features personalized to you like
+这些文字加起来只有367个字符，和(0x4e70-0x140)/0x10=0x4d3=1235这个长度不太相符，所以我怀疑我找错了，你能否帮我找下坐标数据应该在哪次的bufferdata数据里面？
+
+非常感谢，我看懂了，1370_float_size2_stride16_offset320 1371_ubyte_size4_stride16_offset328 s_glVertexAttribPointer,i=2,s=2,t=0x1403,n=0,s=16,ptr=332 就是对坐标位置的描述
+看到这里我有个疑问，就拿 12-scrcpy-01-bad 来举例，对于这种bufferdata中不是纯坐标数据的，GPU怎么知道有多少个这样的font_s数据结构呢？这个字符数字的个数是通过哪个接口确定的？我给的日志中有么？
+
+真的非常非常感谢，我先按照你的建议把需要hook的函数的参数给打印出来；
+
+现在使用正常不花屏的设备，logcat在D:\05-byd\65-b+f_gamesnack_glitch\logcat.txt，抓取的数据在D:\05-byd\65-b+f_gamesnack_glitch\dumpdata_a，1399_target0x0de1_w512_h62_size0x1f000_format0x1903texsub这个是文字texture，对应的坐标data应该是1398_target0x8892_size0x6180，从日志上看坐标应该按照1400_i0_float_size2_stride16_offset0 1401_i1_ubyte_size4_stride16_offset8 1402_i2_ushort_size2_stride16_offset12来寻找，可是1398_target0x8892_size0x6180开头的位置并不是坐标数据，而且s_glDrawElementsInstancedBaseVertexOES,m=0x0004,c=1854,t=0x1403,i=1,b=21这个日志中count数量是1854，这个数量远远超过了367
+
+非常感谢，没有你的讲解我根本理解不了这些api的参数
+
+请帮我再写个demo，命名为gpu font rasterizer replay，我已经将文字texture复制到assets\gpufontrasterizer_texture，bufferdata放到assets\gpufontrasterizer_bufferdata，bufferdata中只包含font_s的数据结构，然后将texture按照bufferdata中的坐标绘制到屏幕上来检查抓到的数据是否正确
+注意texture的width固定为512
+
+显示的画面好像是乱码，我重新更新了文件，使用的是正常显示抓到的数据；另外，texture是GL_RED格式，大小应该是width*height*1

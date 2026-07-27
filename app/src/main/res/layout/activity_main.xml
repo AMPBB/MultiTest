@@ -26,15 +26,52 @@
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_jump_to_gamesnacks"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="gamesnacks" />
+
+                <EditText
+                    android:id="@+id/edit_gamesnacks_width_percent"
+                    android:layout_width="72dp"
+                    android:layout_height="wrap_content"
+                    android:hint="width"
+                    android:inputType="numberDecimal"
+                    android:singleLine="true"
+                    android:text="0.7" />
+
+                <EditText
+                    android:id="@+id/edit_gamesnacks_height_percent"
+                    android:layout_width="72dp"
+                    android:layout_height="wrap_content"
+                    android:hint="height"
+                    android:inputType="numberDecimal"
+                    android:singleLine="true"
+                    android:text="0.7" />
+            </LinearLayout>
             <Button
-                android:id="@+id/button_jump_to_gamesnacks"
-                android:text="gamesnacks"
+                android:id="@+id/button_jump_to_text_attrib_pointer"
+                android:text="text attrib pointer"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <Button
-                android:id="@+id/button_jump_to_text_attrib_pointer"
-                android:text="text attrib pointer"
+                android:id="@+id/button_jump_to_gpu_font_rasterizer"
+                android:text="gpu font rasterizer"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <Button
+                android:id="@+id/button_jump_to_gpu_font_rasterizer_replay"
+                android:text="gpu font rasterizer replay"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -131,6 +168,12 @@
             <Button
                 android:id="@+id/button_jump_to_graphic_buffer"
                 android:text="graphic buffer"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <Button
+                android:id="@+id/button_jump_to_background"
+                android:text="background gl load"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>

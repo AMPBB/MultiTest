@@ -9,6 +9,8 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
@@ -24,17 +26,29 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Locale;
 
 import pbbadd.opengl.multitest.R;
 
 public class GameSnacksActivity extends AppCompatActivity {
     private static final String TAG = "GameSnacksActivity";
     private static final String GAME_SNACKS_URL = "https://gamesnacks.com/";
+    public static final String EXTRA_WIDTH_PERCENT = "gamesnacks_width_percent";
+    public static final String EXTRA_HEIGHT_PERCENT = "gamesnacks_height_percent";
+    private static final float DEFAULT_WEBVIEW_PERCENT = 1.0f;
     private static final boolean ENABLE_GPU_COMPOSITION_STRESS = true;
     private static final int GPU_COMPOSITION_STRESS_LAYER_COUNT = 1;
+    private static final boolean ENABLE_GAME_SNACKS_FRAME_LIMIT = true;
+    private static final float GAME_SNACKS_TARGET_FPS = 10.0f;
 
     private WebView gameSnacksWebView;
     private FrameLayout gpuCompositionStressContainer;
+    private final Handler frameLimitHandler = new Handler(Looper.getMainLooper());
+    private final Runnable injectFrameLimitRunnable = this::injectWebFrameRateLimiter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,16 +58,48 @@ public class GameSnacksActivity extends AppCompatActivity {
 
         gameSnacksWebView = findViewById(R.id.gamesnacks_webview);
         gpuCompositionStressContainer = findViewById(R.id.gamesnacks_gpu_composition_stress_container);
+        applyWebViewSizePercent();
         initWebView();
         initGpuCompositionStressLayers();
+        requestLowDisplayFrameRate();
         loadGameSnacksUrl();
+    }
+
+    private void applyWebViewSizePercent() {
+        float widthPercent = getClampedPercentExtra(EXTRA_WIDTH_PERCENT, DEFAULT_WEBVIEW_PERCENT);
+        float heightPercent = getClampedPercentExtra(EXTRA_HEIGHT_PERCENT, DEFAULT_WEBVIEW_PERCENT);
+
+        ConstraintLayout.LayoutParams params =
+                (ConstraintLayout.LayoutParams) gameSnacksWebView.getLayoutParams();
+        params.matchConstraintPercentWidth = widthPercent;
+        params.matchConstraintPercentHeight = heightPercent;
+        gameSnacksWebView.setLayoutParams(params);
+        Log.d(TAG, "webview percent width=" + widthPercent + ", height=" + heightPercent);
+    }
+
+    private float getClampedPercentExtra(String name, float defaultValue) {
+        float value = getIntent().getFloatExtra(name, defaultValue);
+        if (value > 0.0f && value <= 1.0f) {
+            return value;
+        }
+        return defaultValue;
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private void initWebView() {
         WebView.setWebContentsDebuggingEnabled(true);
         gameSnacksWebView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        gameSnacksWebView.setWebViewClient(new WebViewClient());
+        gameSnacksWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageCommitVisible(WebView view, String url) {
+                scheduleWebFrameRateLimiterInjection();
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                scheduleWebFrameRateLimiterInjection();
+            }
+        });
         gameSnacksWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
@@ -74,6 +120,163 @@ public class GameSnacksActivity extends AppCompatActivity {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
         settings.setOffscreenPreRaster(true);
+    }
+
+    private void requestLowDisplayFrameRate() {
+        if (!ENABLE_GAME_SNACKS_FRAME_LIMIT) {
+            return;
+        }
+
+        if (trySetRequestedFrameRate(gameSnacksWebView, GAME_SNACKS_TARGET_FPS)) {
+            return;
+        }
+        trySetFrameRate(gameSnacksWebView, GAME_SNACKS_TARGET_FPS);
+    }
+
+    private boolean trySetRequestedFrameRate(View view, float frameRate) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return false;
+        }
+
+        try {
+            Method method = View.class.getMethod("setRequestedFrameRate", float.class);
+            method.invoke(view, frameRate);
+            Log.d(TAG, "setRequestedFrameRate: " + frameRate);
+            return true;
+        } catch (Exception e) {
+            Log.d(TAG, "setRequestedFrameRate is not available", e);
+            return false;
+        }
+    }
+
+    private boolean trySetFrameRate(View view, float frameRate) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            return false;
+        }
+
+        try {
+            Method method = View.class.getMethod("setFrameRate", float.class, int.class);
+            Class<?> surfaceClass = Class.forName("android.view.Surface");
+            Field compatibilityField =
+                    surfaceClass.getField("FRAME_RATE_COMPATIBILITY_FIXED_SOURCE");
+            int compatibility = compatibilityField.getInt(null);
+            method.invoke(view, frameRate, compatibility);
+            Log.d(TAG, "setFrameRate: " + frameRate);
+            return true;
+        } catch (Exception e) {
+            Log.d(TAG, "setFrameRate is not available", e);
+            return false;
+        }
+    }
+
+    private void scheduleWebFrameRateLimiterInjection() {
+        if (!ENABLE_GAME_SNACKS_FRAME_LIMIT) {
+            return;
+        }
+
+        frameLimitHandler.removeCallbacks(injectFrameLimitRunnable);
+        injectWebFrameRateLimiter();
+        frameLimitHandler.postDelayed(injectFrameLimitRunnable, 500);
+        frameLimitHandler.postDelayed(injectFrameLimitRunnable, 1500);
+        frameLimitHandler.postDelayed(injectFrameLimitRunnable, 3000);
+    }
+
+    private void injectWebFrameRateLimiter() {
+        if (!ENABLE_GAME_SNACKS_FRAME_LIMIT || gameSnacksWebView == null) {
+            return;
+        }
+
+        long frameIntervalMs = Math.max(1L, Math.round(1000.0f / GAME_SNACKS_TARGET_FPS));
+        String script = buildFrameRateLimiterScript(frameIntervalMs);
+        gameSnacksWebView.evaluateJavascript(script, null);
+    }
+
+    private String buildFrameRateLimiterScript(long frameIntervalMs) {
+        return String.format(Locale.US,
+                "(function(){" +
+                        "var target=%d;" +
+                        "if(window.__multitestFrameLimiterInstalled){" +
+                        "window.__multitestFrameMs=target;" +
+                        "console.log('[MultiTest] frame limiter updated to '+target+'ms');" +
+                        "return;" +
+                        "}" +
+                        "window.__multitestFrameLimiterInstalled=true;" +
+                        "window.__multitestFrameMs=target;" +
+                        "var nativeRAF=window.requestAnimationFrame&&window.requestAnimationFrame.bind(window);" +
+                        "var nativeCAF=window.cancelAnimationFrame&&window.cancelAnimationFrame.bind(window);" +
+                        "var nativeSetTimeout=window.setTimeout.bind(window);" +
+                        "var nativeClearTimeout=window.clearTimeout.bind(window);" +
+                        "var nativeSetInterval=window.setInterval.bind(window);" +
+                        "var nativeClearInterval=window.clearInterval.bind(window);" +
+                        "var callbacks={};" +
+                        "var nextId=1;" +
+                        "var scheduled=false;" +
+                        "var timerId=0;" +
+                        "var lastFrameTime=0;" +
+                        "function now(){" +
+                        "return window.performance&&performance.now?performance.now():Date.now();" +
+                        "}" +
+                        "function clampDelay(delay){" +
+                        "var value=Number(delay);" +
+                        "if(!isFinite(value)||value<0){value=0;}" +
+                        "return value<window.__multitestFrameMs?window.__multitestFrameMs:value;" +
+                        "}" +
+                        "function callCallback(cb,args){" +
+                        "if(typeof cb==='function'){return cb.apply(window,args);}" +
+                        "return (0,eval)(String(cb));" +
+                        "}" +
+                        "function hasCallbacks(){" +
+                        "for(var id in callbacks){return true;}" +
+                        "return false;" +
+                        "}" +
+                        "function schedule(delay){" +
+                        "if(scheduled){return;}" +
+                        "scheduled=true;" +
+                        "timerId=nativeSetTimeout(function(){" +
+                        "timerId=0;" +
+                        "if(nativeRAF){nativeRAF(flush);}else{flush(now());}" +
+                        "},delay||0);" +
+                        "}" +
+                        "function flush(timestamp){" +
+                        "scheduled=false;" +
+                        "var frameTime=timestamp||now();" +
+                        "var remaining=window.__multitestFrameMs-(frameTime-lastFrameTime);" +
+                        "if(lastFrameTime>0&&remaining>1){" +
+                        "schedule(remaining);" +
+                        "return;" +
+                        "}" +
+                        "lastFrameTime=frameTime;" +
+                        "var pending=callbacks;" +
+                        "callbacks={};" +
+                        "Object.keys(pending).forEach(function(id){" +
+                        "try{pending[id](frameTime);}catch(e){nativeSetTimeout(function(){throw e;},0);}" +
+                        "});" +
+                        "if(hasCallbacks()){schedule(window.__multitestFrameMs);}" +
+                        "}" +
+                        "window.requestAnimationFrame=function(cb){" +
+                        "var id=nextId++;" +
+                        "callbacks[id]=cb;" +
+                        "schedule(0);" +
+                        "return id;" +
+                        "};" +
+                        "window.cancelAnimationFrame=function(id){" +
+                        "delete callbacks[id];" +
+                        "if(!hasCallbacks()&&timerId){nativeClearTimeout(timerId);scheduled=false;timerId=0;}" +
+                        "if(nativeCAF){try{nativeCAF(id);}catch(e){}}" +
+                        "};" +
+                        "window.setTimeout=function(cb,delay){" +
+                        "var args=Array.prototype.slice.call(arguments,2);" +
+                        "return nativeSetTimeout(function(){callCallback(cb,args);},clampDelay(delay));" +
+                        "};" +
+                        "window.clearTimeout=function(id){nativeClearTimeout(id);};" +
+                        "window.setInterval=function(cb,delay){" +
+                        "var args=Array.prototype.slice.call(arguments,2);" +
+                        "return nativeSetInterval(function(){callCallback(cb,args);},clampDelay(delay));" +
+                        "};" +
+                        "window.clearInterval=function(id){nativeClearInterval(id);};" +
+                        "console.log('[MultiTest] frame limiter installed: '+target+'ms');" +
+                        "})();",
+                frameIntervalMs);
     }
 
     private void initGpuCompositionStressLayers() {
@@ -107,6 +310,8 @@ public class GameSnacksActivity extends AppCompatActivity {
         applyImmersiveMode();
         gameSnacksWebView.onResume();
         gameSnacksWebView.resumeTimers();
+        requestLowDisplayFrameRate();
+        scheduleWebFrameRateLimiterInjection();
     }
 
     @Override
@@ -126,6 +331,7 @@ public class GameSnacksActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        frameLimitHandler.removeCallbacks(injectFrameLimitRunnable);
         gameSnacksWebView.destroy();
         super.onDestroy();
     }

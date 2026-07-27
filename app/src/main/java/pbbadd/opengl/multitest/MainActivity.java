@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +12,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import pbbadd.opengl.multitest.background.BackgroundActivity;
 import pbbadd.opengl.multitest.cube3d.Cube3DActivity;
 import pbbadd.opengl.multitest.cube3dmultifbo.ActivityCube3DMultiFbo;
 import pbbadd.opengl.multitest.doublesurfacefbo.DoubleSurfaceFboActivity;
@@ -19,6 +21,8 @@ import pbbadd.opengl.multitest.egl.ActivityEGL;
 import pbbadd.opengl.multitest.fbomulti.ActivityFboMulti;
 import pbbadd.opengl.multitest.fbomultijava.ActivityFboMultiJava;
 import pbbadd.opengl.multitest.gamesnacks.GameSnacksActivity;
+import pbbadd.opengl.multitest.gpufontrasterizer.GpuFontRasterizerActivity;
+import pbbadd.opengl.multitest.gpufontrasterizerreplay.GpuFontRasterizerReplayActivity;
 import pbbadd.opengl.multitest.graphicbuffer.GraphicBufferActivity;
 import pbbadd.opengl.multitest.hugeteximage2d.HugeTexActivity;
 import pbbadd.opengl.multitest.pbuffer.ActivityPbufferDemo;
@@ -37,6 +41,10 @@ public class MainActivity extends AppCompatActivity {
     private Button jump_to_huge_tex_image_2d;
     private Button jump_to_gamesnacks;
     private Button jump_to_text_attrib_pointer;
+    private Button jump_to_gpu_font_rasterizer;
+    private Button jump_to_gpu_font_rasterizer_replay;
+    private EditText edit_gamesnacks_width_percent;
+    private EditText edit_gamesnacks_height_percent;
 
     private Button jump_to_textureview;
     private Button jump_to_egl;
@@ -56,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private Button jump_to_double_surface_fbo_cube3d;
     private Button jump_to_pbuffer;
     private Button jump_to_graphic_buffer;
+    private Button jump_to_background;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_huge_tex_image_2d();
         init_jump_to_gamesnacks();
         init_jump_to_text_attrib_pointer();
+        init_jump_to_gpu_font_rasterizer();
+        init_jump_to_gpu_font_rasterizer_replay();
 
         init_jump_to_textureview();
         init_jump_to_egl();
@@ -92,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
         init_jump_to_double_surface_fbo_cube3d();
         init_jump_to_pbuffer();
         init_jump_to_graphic_buffer();
+        init_jump_to_background();
     }
 
     private void init_jump_to_text_attrib_pointer() {
@@ -103,13 +115,49 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void init_jump_to_gpu_font_rasterizer() {
+        jump_to_gpu_font_rasterizer=findViewById(R.id.button_jump_to_gpu_font_rasterizer);
+        jump_to_gpu_font_rasterizer.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, GpuFontRasterizerActivity.class);
+            Log.d(log_tag,"jump to gpu font rasterizer");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_gpu_font_rasterizer_replay() {
+        jump_to_gpu_font_rasterizer_replay=findViewById(R.id.button_jump_to_gpu_font_rasterizer_replay);
+        jump_to_gpu_font_rasterizer_replay.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, GpuFontRasterizerReplayActivity.class);
+            Log.d(log_tag,"jump to gpu font rasterizer replay");
+            startActivity(intent);
+        });
+    }
+
     private void init_jump_to_gamesnacks() {
         jump_to_gamesnacks=findViewById(R.id.button_jump_to_gamesnacks);
+        edit_gamesnacks_width_percent=findViewById(R.id.edit_gamesnacks_width_percent);
+        edit_gamesnacks_height_percent=findViewById(R.id.edit_gamesnacks_height_percent);
         jump_to_gamesnacks.setOnClickListener(v->{
             Intent intent=new Intent(MainActivity.this, GameSnacksActivity.class);
+            float widthPercent = parsePercent(edit_gamesnacks_width_percent, 0.7f);
+            float heightPercent = parsePercent(edit_gamesnacks_height_percent, 0.7f);
+            intent.putExtra(GameSnacksActivity.EXTRA_WIDTH_PERCENT, widthPercent);
+            intent.putExtra(GameSnacksActivity.EXTRA_HEIGHT_PERCENT, heightPercent);
             Log.d(log_tag,"jump to gamesnacks");
             startActivity(intent);
         });
+    }
+
+    private float parsePercent(EditText editText, float defaultValue) {
+        try {
+            float value = Float.parseFloat(editText.getText().toString().trim());
+            if (value > 0.0f && value <= 1.0f) {
+                return value;
+            }
+        } catch (NumberFormatException e) {
+            Log.d(log_tag, "invalid gamesnacks percent: " + editText.getText(), e);
+        }
+        return defaultValue;
     }
 
     private void init_jump_to_huge_tex_image_2d() {
@@ -126,6 +174,15 @@ public class MainActivity extends AppCompatActivity {
         jump_to_graphic_buffer.setOnClickListener(v->{
             Intent intent=new Intent(MainActivity.this, GraphicBufferActivity.class);
             Log.d(log_tag,"jump to graphic buffer");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_background() {
+        jump_to_background=findViewById(R.id.button_jump_to_background);
+        jump_to_background.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, BackgroundActivity.class);
+            Log.d(log_tag,"jump to background gl load");
             startActivity(intent);
         });
     }

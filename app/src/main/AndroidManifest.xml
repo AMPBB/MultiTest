@@ -15,6 +15,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MultiTest">
         <activity
+            android:name=".background.BackgroundActivity"
+            android:exported="false" />
+        <service
+            android:name=".background.BackgroundGlLoadService"
+            android:exported="false" />
+        <activity
+            android:name=".gpufontrasterizer.GpuFontRasterizerActivity"
+            android:exported="false"
+            android:hardwareAccelerated="true" />
+        <activity
+            android:name=".gpufontrasterizerreplay.GpuFontRasterizerReplayActivity"
+            android:exported="false"
+            android:hardwareAccelerated="true" />
+        <activity
             android:name=".doublesurfacefbocube3d.DoubleSurfaceFboCube3DActivity"
             android:exported="false" />
         <activity
