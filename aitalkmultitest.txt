@@ -225,3 +225,22 @@ Get features personalized to you like
 注意texture的width固定为512
 
 显示的画面好像是乱码，我重新更新了文件，使用的是正常显示抓到的数据；另外，texture是GL_RED格式，大小应该是width*height*1
+
+请再帮我修改下，我不想将texture和bufferdata集成在app中了，这样非常麻烦；改成读取/sdcard/texture和读取/sdcard/bufferdata这两个文件，如果没有读取文件的权限则显示没有文件权限的长消息，如果文件不存在则显示文件不存在的长消息；其它逻辑保持不变；
+
+app启动的时候并没有请求文件权限，请帮忙改成自动请求文件权限
+
+点击gpu font rasterizer replay之后 app 直接闪退了，报错我粘贴到MultiTest\logcat.txt文件中了
+
+请帮我修改为/storage/emulated/10/Documents/bufferdata和/storage/emulated/10/Documents/texture
+
+正常app应该是可以读取到/storage/emulated/10/Documents这下面的文件的，同时我也setenforce 0了,但是不知道为什么还是没有权限；
+
+我将路径改成了/data/xxxx就可以读取了，非常感谢你给我修改的代码
+
+请再帮我修改下replay，因为我抓到的是glTexSubImage2D传输的数据，所以会有多次的纹理更新，需要将多次的纹理数据都更新到一起才能得到一个完整的texture数据；
+我将所有的texture数据放到了/data/replay文件夹中，文件名格式为<no>_t0x0de1_x<x>_y<y>_w<w>_h<h>_texsubimage2d
+<no>为编号，请按编号顺序来进行更新texture
+<x>和<y>为偏移量，实际上就是glTexSubImage2D的x_offset和y_offset偏移参数
+<w>和<h>为buffer实际的宽高，可以忽略，因为texture buffer需要使用固定的512x512，这块代码也需要修改，之前只是固定宽度为512，高度没有固定；
+bufferdata也放到了/data/replay文件夹中，数据还是和之前一样的，我放入的数据直接按照纯坐标数据来使用就可以了

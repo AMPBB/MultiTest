@@ -3,7 +3,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#111111"
+    android:background="#ffffff"
     android:orientation="vertical">
 
     <LinearLayout
@@ -17,7 +17,7 @@
             android:id="@+id/checkbox_fit_to_bounds"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
+            android:checked="false"
             android:text="fit" />
 
         <TextView

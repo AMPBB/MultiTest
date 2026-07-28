@@ -1,7 +1,6 @@
 package pbbadd.opengl.multitest.gpufontrasterizerreplay;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
@@ -9,6 +8,8 @@ import android.util.Log;
 import android.view.View;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -21,13 +22,12 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurfaceView.Renderer {
     private static final String TAG = "GpuFontReplayView";
-    private static final String TEXTURE_ASSET = "gpufontrasterizer_texture";
-    private static final String BUFFER_ASSET = "gpufontrasterizer_bufferdata";
     private static final int TEXTURE_WIDTH = 512;
+    private static final int TEXTURE_HEIGHT = 512;
     private static final int FONT_VERTEX_STRIDE_BYTES = 16;
     private static final int BYTES_PER_SHORT = 2;
 
-    private final ReplayData replayData;
+    private volatile ReplayData replayData;
 
     private int program;
     private int textureId;
@@ -51,16 +51,25 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
 
     public GpuFontRasterizerReplayView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        try {
-            replayData = loadReplayData(context.getAssets());
-        } catch (IOException e) {
-            throw new IllegalStateException("load gpu font rasterizer replay assets failed", e);
-        }
         init();
     }
 
     public String getReplayInfo() {
-        return replayData.infoText;
+        ReplayData data = replayData;
+        return data == null ? "" : data.infoText;
+    }
+
+    public void setReplayData(ReplayData replayData) {
+        this.replayData = replayData;
+        if (program != 0) {
+            queueEvent(() -> {
+                deleteReplayGlResources();
+                createReplayGlResources(replayData);
+                requestRender();
+            });
+        } else {
+            requestRender();
+        }
     }
 
     public void setFitToBounds(boolean fitToBounds) {
@@ -88,11 +97,12 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
         boundsLocation = GLES30.glGetUniformLocation(program, "uBounds");
         fitToBoundsLocation = GLES30.glGetUniformLocation(program, "uFitToBounds");
 
-        textureId = createTexture();
-        vertexBufferId = createVertexBuffer();
-        indexBufferId = createIndexBuffer();
+        ReplayData data = replayData;
+        if (data != null) {
+            createReplayGlResources(data);
+        }
 
-        GLES30.glClearColor(0.02f, 0.02f, 0.025f, 1.0f);
+        GLES30.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         GLES30.glEnable(GLES30.GL_BLEND);
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA);
     }
@@ -108,15 +118,17 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
     @Override
     public void onDrawFrame(GL10 gl) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT);
-        if (program == 0 || replayData.indexCount == 0 || viewWidth <= 0 || viewHeight <= 0) {
+        ReplayData data = replayData;
+        if (program == 0 || data == null || data.indexCount == 0
+                || viewWidth <= 0 || viewHeight <= 0) {
             return;
         }
 
         GLES30.glUseProgram(program);
         GLES30.glUniform2f(viewSizeLocation, viewWidth, viewHeight);
-        GLES30.glUniform2f(textureSizeLocation, TEXTURE_WIDTH, replayData.textureHeight);
+        GLES30.glUniform2f(textureSizeLocation, TEXTURE_WIDTH, data.textureHeight);
         GLES30.glUniform4f(boundsLocation,
-                replayData.minX, replayData.minY, replayData.maxX, replayData.maxY);
+                data.minX, data.minY, data.maxX, data.maxY);
         GLES30.glUniform1i(fitToBoundsLocation, fitToBounds ? 1 : 0);
 
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
@@ -135,7 +147,7 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
                 FONT_VERTEX_STRIDE_BYTES, 12);
 
         GLES30.glBindBuffer(GLES30.GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
-        GLES30.glDrawElements(GLES30.GL_TRIANGLES, replayData.indexCount,
+        GLES30.glDrawElements(GLES30.GL_TRIANGLES, data.indexCount,
                 GLES30.GL_UNSIGNED_SHORT, 0);
 
         GLES30.glDisableVertexAttribArray(positionLocation);
@@ -145,7 +157,32 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, 0);
     }
 
-    private int createTexture() {
+    private void createReplayGlResources(ReplayData replayData) {
+        textureId = createTexture(replayData);
+        vertexBufferId = createVertexBuffer(replayData);
+        indexBufferId = createIndexBuffer(replayData);
+    }
+
+    private void deleteReplayGlResources() {
+        int[] ids = new int[1];
+        if (textureId != 0) {
+            ids[0] = textureId;
+            GLES30.glDeleteTextures(1, ids, 0);
+            textureId = 0;
+        }
+        if (vertexBufferId != 0) {
+            ids[0] = vertexBufferId;
+            GLES30.glDeleteBuffers(1, ids, 0);
+            vertexBufferId = 0;
+        }
+        if (indexBufferId != 0) {
+            ids[0] = indexBufferId;
+            GLES30.glDeleteBuffers(1, ids, 0);
+            indexBufferId = 0;
+        }
+    }
+
+    private int createTexture(ReplayData replayData) {
         int[] textures = new int[1];
         GLES30.glGenTextures(1, textures, 0);
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textures[0]);
@@ -164,7 +201,7 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
         return textures[0];
     }
 
-    private int createVertexBuffer() {
+    private int createVertexBuffer(ReplayData replayData) {
         ByteBuffer vertexBuffer = ByteBuffer.allocateDirect(replayData.vertexBytes.length)
                 .order(ByteOrder.nativeOrder());
         vertexBuffer.put(replayData.vertexBytes);
@@ -179,7 +216,7 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
         return buffers[0];
     }
 
-    private int createIndexBuffer() {
+    private int createIndexBuffer(ReplayData replayData) {
         ByteBuffer indexByteBuffer = ByteBuffer.allocateDirect(replayData.indexCount * BYTES_PER_SHORT)
                 .order(ByteOrder.nativeOrder());
         ShortBuffer indexBuffer = indexByteBuffer.asShortBuffer();
@@ -203,10 +240,10 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
         return buffers[0];
     }
 
-    private static ReplayData loadReplayData(AssetManager assetManager) throws IOException {
-        byte[] bufferBytes = readAsset(assetManager, BUFFER_ASSET);
+    public static ReplayData loadReplayData(File textureFile, File bufferDataFile) throws IOException {
+        byte[] bufferBytes = readFile(bufferDataFile);
         if (bufferBytes.length < FONT_VERTEX_STRIDE_BYTES) {
-            throw new IOException("empty font vertex buffer asset");
+            throw new IOException("empty font vertex buffer file");
         }
 
         int vertexCount = bufferBytes.length / FONT_VERTEX_STRIDE_BYTES;
@@ -214,8 +251,7 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
         int indexCount = quadCount * 6;
         Bounds bounds = parseBounds(bufferBytes, vertexCount);
 
-        byte[] textureRawBytes = readAsset(assetManager, TEXTURE_ASSET);
-        TextureData textureData = decodeTexture(textureRawBytes);
+        TextureData textureData = loadFullTexture(textureFile);
 
         String infoText = String.format(Locale.US,
                 "texture=%dx%d GL_RED, vertex=%d, quad=%d, index=%d, bounds=(%.0f,%.0f)-(%.0f,%.0f), uvMax=(%d,%d)",
@@ -236,12 +272,14 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
                 vertexCount, quadCount, indexCount, bounds, infoText);
     }
 
-    private static TextureData decodeTexture(byte[] rawBytes) throws IOException {
-        if (rawBytes.length % TEXTURE_WIDTH != 0) {
-            throw new IOException("texture asset size is not aligned to width 512: " + rawBytes.length);
+    private static TextureData loadFullTexture(File textureFile) throws IOException {
+        byte[] texturePixels = readFile(textureFile);
+        int expectedSize = TEXTURE_WIDTH * TEXTURE_HEIGHT;
+        if (texturePixels.length != expectedSize) {
+            throw new IOException("texture file size must be 512x512 GL_RED bytes, actual="
+                    + texturePixels.length + ", expected=" + expectedSize);
         }
-
-        return new TextureData(rawBytes, rawBytes.length / TEXTURE_WIDTH);
+        return new TextureData(texturePixels, TEXTURE_HEIGHT);
     }
 
     private static Bounds parseBounds(byte[] bufferBytes, int vertexCount) {
@@ -275,8 +313,8 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
         return new Bounds(minX, minY, maxX, maxY, maxU, maxV);
     }
 
-    private static byte[] readAsset(AssetManager assetManager, String name) throws IOException {
-        InputStream inputStream = assetManager.open(name);
+    private static byte[] readFile(File file) throws IOException {
+        InputStream inputStream = new FileInputStream(file);
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[16 * 1024];
@@ -326,7 +364,7 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
         return shader;
     }
 
-    private static final class ReplayData {
+    public static final class ReplayData {
         final byte[] vertexBytes;
         final byte[] texturePixels;
         final int textureHeight;
@@ -337,7 +375,7 @@ public class GpuFontRasterizerReplayView extends GLSurfaceView implements GLSurf
         final float minY;
         final float maxX;
         final float maxY;
-        final String infoText;
+        public final String infoText;
 
         ReplayData(byte[] vertexBytes, byte[] texturePixels, int textureHeight,
                    int vertexCount, int quadCount, int indexCount,
