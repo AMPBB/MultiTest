@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/text_gl_get_integerv_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="waiting for GLES context..."
+        android:textColor="#111111"
+        android:textSize="16sp" />
+
+    <pbbadd.opengl.multitest.glgetintegerv.GlGetIntegervView
+        android:id="@+id/view_gl_get_integerv"
+        android:layout_width="1dp"
+        android:layout_height="1dp" />
+</LinearLayout>

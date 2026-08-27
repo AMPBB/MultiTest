@@ -22,7 +22,7 @@ import pbbadd.opengl.multitest.R;
 public class GpuFontRasterizerActivity extends AppCompatActivity {
     private static final String TAG = "GpuFontRasterizer";
     private static final String GPU_FONT_RASTERIZER_URL =
-            "file:///android_asset/gpu_font_rasterizer.html";
+            "file:///android_asset/gamesnacks.html";
 
     private WebView webView;
 

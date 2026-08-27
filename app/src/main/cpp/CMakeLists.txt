@@ -10,7 +10,8 @@ add_library(
         resizeableview/resizable_view.cpp
         resizeableview/manual_egl.cpp
         fbomulti/fbo_multi.cpp
-        cube3dmultifbo/cube3d_multi_fbo.cpp)
+        cube3dmultifbo/cube3d_multi_fbo.cpp
+        texturemultisampleext/texture_multi_sample_ext.cpp)
 
 find_library(EGL-lib EGL)
 

@@ -17,7 +17,7 @@ android {
 
         //add for native compile
         ndk {
-            abiFilters 'arm64-v8a', 'armeabi-v7a'
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64'
         }
         externalNativeBuild {
             cmake {

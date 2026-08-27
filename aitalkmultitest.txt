@@ -244,3 +244,28 @@ app启动的时候并没有请求文件权限，请帮忙改成自动请求文�
 <x>和<y>为偏移量，实际上就是glTexSubImage2D的x_offset和y_offset偏移参数
 <w>和<h>为buffer实际的宽高，可以忽略，因为texture buffer需要使用固定的512x512，这块代码也需要修改，之前只是固定宽度为512，高度没有固定；
 bufferdata也放到了/data/replay文件夹中，数据还是和之前一样的，我放入的数据直接按照纯坐标数据来使用就可以了
+
+请基于python3帮我写个脚本，放在D:\AndroidCode\MultiTest\app\src\main\assets\03push中，读取当前目录下所有名字符合 <no>_t0x0de1_x<x>_y<y>_w<w>_h<h>_texsubimage2d 的文件，然后组合成一个texture二进制数据，命名为texture；
+组合成texture文件之后使用工具可以确认组合后的纹理没有错乱；
+进入replay之后上面的勾选框有什么作用？帮我改成默认不勾选
+将replay机制改成原来的方式，读取/data/texture和/data/bufferdata进行replay
+
+能否将replay的背景改成白色的，我想看看如果我的texture不是完整的情况下，绘制到屏幕上的情况是否和花屏类似
+
+请帮我修改下gpu_font_rasterizer.html，我修改了内容但是无法正常换行，请帮我修改下让文字能自动换行
+
+请帮我新增一个glGetIntegervActivity，点击之后通过调用glGetIntegerv来获取GL_MAX_VERTEX_ATTRIBS/GL_MAX_VERTEX_UNIFORM_VECTORS/GL_MAX_VARYING_VECTORS/GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS/GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS/GL_MAX_TEXTURE_IMAGE_UNITS/GL_MAX_FRAGMENT_UNIFORM_VECTORS的属性值，并打印出来
+
+加一个 GL_MAX_RENDERBUFFER_SIZE 
+
+请帮我看下 gpu font rasterizer，我已经修改了 gpu_font_rasterizer.html 内容，但是我通过chrome://inspect打开layer borders没有看到像gamesnacks一样的青色分界线，为什么？
+
+GL_EXT_multisampled_render_to_texture会让webview在光栅化的过程中调用glFramebufferTexture2DMultisampleEXT；
+请帮我写个demo，跳转按钮名为texture multi sample ext，我想知道glFramebufferTexture2DMultisampleEXT正常的调用流程，请使用离屏fbo来进行显示
+
+正常的 webview 显示中，我将所有的 gles api log 打开，并没有看到切换到framebuffer 0再用offscreenTexture绘制
+能否模拟下，做个双线程gl上下文，multisample的线程不绘制offscreenTexture到framebuffer0上，主线程绘制到framebuffer 0上
+
+现在的glFramebufferTexture2DMultisampleEXT只调用了一次，请帮我修改下，每次loop循环都重新调用一次
+
+请帮我添加一个glTexSubImage2D format测试demo，使用 GL_RGBA GL_RGB GL_BGRA_EXT 这三种不同格式来更新texture，循环次数可以设置

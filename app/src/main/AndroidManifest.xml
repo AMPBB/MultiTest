@@ -35,6 +35,18 @@
             android:exported="false"
             android:hardwareAccelerated="true" />
         <activity
+            android:name=".glgetintegerv.GlGetIntegervActivity"
+            android:exported="false"
+            android:hardwareAccelerated="true" />
+        <activity
+            android:name=".texturemultisampleext.TextureMultiSampleExtActivity"
+            android:exported="false"
+            android:hardwareAccelerated="true" />
+        <activity
+            android:name=".texsubimageformat.TexSubImageFormatActivity"
+            android:exported="false"
+            android:hardwareAccelerated="true" />
+        <activity
             android:name=".doublesurfacefbocube3d.DoubleSurfaceFboCube3DActivity"
             android:exported="false" />
         <activity

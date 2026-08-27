@@ -88,6 +88,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
             <Button
+                android:id="@+id/button_jump_to_gl_get_integerv"
+                android:text="glGetIntegerv"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <Button
+                android:id="@+id/button_jump_to_texture_multi_sample_ext"
+                android:text="texture multi sample ext"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <Button
+                android:id="@+id/button_jump_to_tex_sub_image_format"
+                android:text="texsubimage2d format"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <Button
                 android:id="@+id/button_jump_to_cube3d"
                 android:text="cube3d"
                 android:layout_gravity="center"

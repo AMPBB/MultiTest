@@ -24,6 +24,7 @@ import pbbadd.opengl.multitest.gamesnacks.GameSnacksActivity;
 import pbbadd.opengl.multitest.gpufontrasterizer.GpuFontRasterizerActivity;
 import pbbadd.opengl.multitest.gpufontrasterizerreplay.GpuFontRasterizerReplayActivity;
 import pbbadd.opengl.multitest.graphicbuffer.GraphicBufferActivity;
+import pbbadd.opengl.multitest.glgetintegerv.GlGetIntegervActivity;
 import pbbadd.opengl.multitest.hugeteximage2d.HugeTexActivity;
 import pbbadd.opengl.multitest.pbuffer.ActivityPbufferDemo;
 import pbbadd.opengl.multitest.resizeableview.ActivityResizeableView;
@@ -32,6 +33,8 @@ import pbbadd.opengl.multitest.surfacenocache.ActivitySurfaceNoCache;
 import pbbadd.opengl.multitest.surfaceusecache.ActivitySurfaceUseCache;
 import pbbadd.opengl.multitest.surfaceviewchoregrapher.ActivitySurfaceViewChoreographer;
 import pbbadd.opengl.multitest.textattrib.TextAttribPointerActivity;
+import pbbadd.opengl.multitest.texsubimageformat.TexSubImageFormatActivity;
+import pbbadd.opengl.multitest.texturemultisampleext.TextureMultiSampleExtActivity;
 import pbbadd.opengl.multitest.textureview.ActivityTextureview;
 import pbbadd.opengl.multitest.wallpaper.ActivityWallpaper;
 
@@ -48,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Button jump_to_textureview;
     private Button jump_to_egl;
+    private Button jump_to_gl_get_integerv;
+    private Button jump_to_texture_multi_sample_ext;
+    private Button jump_to_tex_sub_image_format;
     private Button jump_to_cube3d;
 
     private Button jump_to_surface_no_cache;
@@ -89,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
 
         init_jump_to_textureview();
         init_jump_to_egl();
+        init_jump_to_gl_get_integerv();
+        init_jump_to_texture_multi_sample_ext();
+        init_jump_to_tex_sub_image_format();
         init_jump_to_cube3d();
         init_jump_to_surface_no_cache();
         init_jump_to_surface_use_cache();
@@ -303,6 +312,35 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
+    private void init_jump_to_gl_get_integerv() {
+        jump_to_gl_get_integerv=findViewById(R.id.button_jump_to_gl_get_integerv);
+        jump_to_gl_get_integerv.setOnClickListener(v->{
+            Intent intent=new Intent(MainActivity.this, GlGetIntegervActivity.class);
+            Log.d(log_tag,"jump to glGetIntegerv activity");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_texture_multi_sample_ext() {
+        jump_to_texture_multi_sample_ext =
+                findViewById(R.id.button_jump_to_texture_multi_sample_ext);
+        jump_to_texture_multi_sample_ext.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, TextureMultiSampleExtActivity.class);
+            Log.d(log_tag, "jump to texture multi sample ext activity");
+            startActivity(intent);
+        });
+    }
+
+    private void init_jump_to_tex_sub_image_format() {
+        jump_to_tex_sub_image_format =
+                findViewById(R.id.button_jump_to_tex_sub_image_format);
+        jump_to_tex_sub_image_format.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, TexSubImageFormatActivity.class);
+            Log.d(log_tag, "jump to texsubimage2d format activity");
+            startActivity(intent);
+        });
+    }
+
     private void init_jump_to_textureview() {
         jump_to_textureview=findViewById(R.id.button_jump_to_textureview);
         jump_to_textureview.setOnClickListener(v->{
