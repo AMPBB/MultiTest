@@ -269,3 +269,21 @@ GL_EXT_multisampled_render_to_texture会让webview在光栅化的过程中调用
 现在的glFramebufferTexture2DMultisampleEXT只调用了一次，请帮我修改下，每次loop循环都重新调用一次
 
 请帮我添加一个glTexSubImage2D format测试demo，使用 GL_RGBA GL_RGB GL_BGRA_EXT 这三种不同格式来更新texture，循环次数可以设置
+
+请帮我修改 texture multi sample ext ，需要加上 glRenderbufferStorageMultisampleEXT 的使用
+
+texture_multi_sample_ext.cpp为什么需要这个文件，glRenderbufferStorageMultisampleEXT 和 glFramebufferTexture2DMultisampleEXT 无法直接在java代码中调用么？
+
+能否将gles2的调用换成gles3.2的，java层应该是可以正常调用 glFramebufferTexture2DMultisampleEXT 的
+
+请帮忙修改 texture multi sample ext 的流程，以下是伪代码描述的主要流程：
+thread draw:
+glGenTexture &fbo_tex //给 glFramebufferTexture2DMultisampleEXT 使用的
+glGenFramebuffer &fbo_offscreen
+glGenTexture &tex_draw
+glBindTexture tex_draw
+glTexStorage2D tex_draw
+glTexSubImage2D tex_draw
+glRenderbufferStorageMultisampleEXT
+glFramebufferTexture2DMultisampleEXT fbo_offscreen fbo_tex
+
