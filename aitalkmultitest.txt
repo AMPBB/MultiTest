@@ -256,7 +256,7 @@ bufferdata也放到了/data/replay文件夹中，数据还是和之前一样的�
 
 请帮我新增一个glGetIntegervActivity，点击之后通过调用glGetIntegerv来获取GL_MAX_VERTEX_ATTRIBS/GL_MAX_VERTEX_UNIFORM_VECTORS/GL_MAX_VARYING_VECTORS/GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS/GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS/GL_MAX_TEXTURE_IMAGE_UNITS/GL_MAX_FRAGMENT_UNIFORM_VECTORS的属性值，并打印出来
 
-加一个 GL_MAX_RENDERBUFFER_SIZE 
+加一个 GL_MAX_RENDERBUFFER_SIZE
 
 请帮我看下 gpu font rasterizer，我已经修改了 gpu_font_rasterizer.html 内容，但是我通过chrome://inspect打开layer borders没有看到像gamesnacks一样的青色分界线，为什么？
 
@@ -276,7 +276,7 @@ texture_multi_sample_ext.cpp为什么需要这个文件，glRenderbufferStorageM
 
 能否将gles2的调用换成gles3.2的，java层应该是可以正常调用 glFramebufferTexture2DMultisampleEXT 的
 
-请帮忙修改 texture multi sample ext 的流程，以下是伪代码描述的主要流程：
+请帮忙修改 texture multi sample ext 的流程，以下是伪代码描述的想要加入的流程：
 thread draw:
 glGenTexture &fbo_tex //给 glFramebufferTexture2DMultisampleEXT 使用的
 glGenFramebuffer &fbo_offscreen
@@ -286,4 +286,14 @@ glTexStorage2D tex_draw
 glTexSubImage2D tex_draw
 glRenderbufferStorageMultisampleEXT
 glFramebufferTexture2DMultisampleEXT fbo_offscreen fbo_tex
+glDraw*
+thead swap:
+shared_tex --> fbo_tex
+glBindFramebuffer 0
+glBindTexture shared_tex
+glDraw*
+eglSwapbuffer
+我想加入的主要是在multsample绑定fbo的时候在上面绘制纹理，请保持原本drawScene中的旋转三角形不变
+
+请帮忙再加入一些流程，我想在 fbo_offscreen 上再绘制一些向量图形，帮我绘制些GL_R8格式的像素吧
 

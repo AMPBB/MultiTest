@@ -396,6 +396,7 @@ public class TextureMultiSampleExtView extends SurfaceView implements SurfaceHol
                 LogFrameBindingOnce.logMultisampleFramebuffer(offscreenFbo);
                 boolean frameWantsMultisample = extensionSupported && procSupported;
                 updateDepthRenderbufferStorage(depthRenderbuffer, frameWantsMultisample);
+                drawOffscreenTexture_before_bind_texture(textureProgram, drawTexture);
                 usingExtension = attachOffscreenTexture(fboTexture);
                 if (usingExtension != frameWantsMultisample) {
                     updateDepthRenderbufferStorage(depthRenderbuffer, usingExtension);
@@ -404,10 +405,11 @@ public class TextureMultiSampleExtView extends SurfaceView implements SurfaceHol
                 GLES32.glClearColor(0.04f, 0.05f, 0.09f, 1.0f);
                 GLES32.glEnable(GLES32.GL_DEPTH_TEST);
                 GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT | GLES32.GL_DEPTH_BUFFER_BIT);
+                drawOffscreenTexture_after_bind_texture(textureProgram, drawTexture);
 //                drawOffscreenTexture(textureProgram, drawTexture);
                 GLES32.glEnable(GLES32.GL_DEPTH_TEST);
                 drawScene(sceneProgram, angle);
-                GLES32.glFinish();
+//                GLES32.glFinish();
 
                 synchronized (frameLock) {
                     if (stopRequested) {
@@ -656,6 +658,40 @@ public class TextureMultiSampleExtView extends SurfaceView implements SurfaceHol
 
         GLES32.glActiveTexture(GLES32.GL_TEXTURE0);
         GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, texture);
+        GLES32.glUniform1i(textureLocation, 0);
+        GLES32.glDrawArrays(GLES32.GL_TRIANGLE_STRIP, 0, 4);
+
+        GLES32.glDisableVertexAttribArray(positionLocation);
+        GLES32.glDisableVertexAttribArray(texCoordLocation);
+    }
+
+    private void drawOffscreenTexture_before_bind_texture(int program, int texture) {
+        GLES32.glDisable(GLES32.GL_DEPTH_TEST);
+        GLES32.glUseProgram(program);
+
+        int positionLocation = GLES32.glGetAttribLocation(program, "aPosition");
+        int texCoordLocation = GLES32.glGetAttribLocation(program, "aTexCoord");
+        int textureLocation = GLES32.glGetUniformLocation(program, "uTexture");
+
+        blitPositions.position(0);
+        GLES32.glVertexAttribPointer(positionLocation, 2, GLES32.GL_FLOAT, false,
+                0, blitPositions);
+        GLES32.glEnableVertexAttribArray(positionLocation);
+
+        blitTexCoords.position(0);
+        GLES32.glVertexAttribPointer(texCoordLocation, 2, GLES32.GL_FLOAT, false,
+                0, blitTexCoords);
+        GLES32.glEnableVertexAttribArray(texCoordLocation);
+
+        GLES32.glActiveTexture(GLES32.GL_TEXTURE0);
+        GLES32.glBindTexture(GLES32.GL_TEXTURE_2D, texture);
+    }
+
+    private void drawOffscreenTexture_after_bind_texture(int program, int texture) {
+        int positionLocation = GLES32.glGetAttribLocation(program, "aPosition");
+        int texCoordLocation = GLES32.glGetAttribLocation(program, "aTexCoord");
+        int textureLocation = GLES32.glGetUniformLocation(program, "uTexture");
+
         GLES32.glUniform1i(textureLocation, 0);
         GLES32.glDrawArrays(GLES32.GL_TRIANGLE_STRIP, 0, 4);
 
